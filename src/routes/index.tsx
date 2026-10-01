@@ -113,11 +113,7 @@ function FightApp() {
               >
                 <span className="ac-fighter-number">0{FIGHTER_LIST.indexOf(item) + 1}</span>
                 <span className="ac-fighter-silhouette">
-                  {FIGHTER_SPRITES[item.id].portrait ? (
-                    <img src={FIGHTER_SPRITES[item.id].portrait ?? undefined} alt="" />
-                  ) : (
-                    <span aria-hidden="true">{item.name[0]}</span>
-                  )}
+                  <FighterPortrait fighter={item.id} name={item.name} />
                 </span>
                 <span className="ac-fighter-name">{item.name}</span>
                 <span className="ac-fighter-epithet">{item.epithet}</span>
@@ -223,6 +219,15 @@ function Stat({ label, value }: { label: string; value: number }) {
       </i>
     </span>
   );
+}
+
+function FighterPortrait({ fighter, name }: { fighter: FighterId; name: string }) {
+  const portrait = FIGHTER_SPRITES[fighter].portrait;
+  const [loadFailed, setLoadFailed] = useState(false);
+
+  if (!portrait || loadFailed) return <span aria-hidden="true">{name[0]}</span>;
+
+  return <img src={portrait} alt="" onError={() => setLoadFailed(true)} />;
 }
 
 function FightScreen({

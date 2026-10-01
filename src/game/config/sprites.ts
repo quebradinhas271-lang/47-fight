@@ -56,12 +56,18 @@ const pendingSprite = (): FighterSpriteDef => ({
 });
 
 /**
- * Contrato dos assets oficiais. Os caminhos permanecem desativados até que os
- * arquivos sejam publicados; assim seleção e arena continuam usando fallback.
+ * Contrato dos assets oficiais. Os retratos são usados na seleção, enquanto as
+ * spritesheets permanecem desativadas e a arena continua usando seu fallback.
  */
 export const FIGHTER_SPRITES: Record<FighterId, FighterSpriteDef> = {
-  dictador: pendingSprite(),
-  holofokiu: pendingSprite(),
+  dictador: {
+    ...pendingSprite(),
+    portrait: "/assets/fighters/el-dictador-portrait.png",
+  },
+  holofokiu: {
+    ...pendingSprite(),
+    portrait: "/assets/fighters/holofokiu-portrait.png",
+  },
 };
 
 export const spriteTextureKey = (fighter: FighterId) => `fighter-${fighter}`;
