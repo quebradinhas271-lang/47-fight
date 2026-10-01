@@ -37,7 +37,7 @@ export const COMBAT = {
   MAX_COMBO: 3,
   COMBO_DAMAGE_SCALING: 0.85,
 
-  AIR_CONTROL: 0.75,
+  AIR_CONTROL: 0.9,
   GROUND_FRICTION: 12,
   HURT_FRICTION: 4,
 } as const;
