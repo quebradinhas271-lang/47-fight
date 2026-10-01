@@ -1,6 +1,12 @@
 import Phaser from "phaser";
 import { COMBAT, type Difficulty } from "../config/combat";
 import { FIGHTERS, type FighterId } from "../config/fighters";
+import {
+  FIGHTER_SPRITES,
+  spriteAnimationKey,
+  spriteTextureKey,
+  type FighterAnimation,
+} from "../config/sprites";
 import { Fighter } from "../core/Fighter";
 import { FighterAI } from "../core/ai";
 import { resolveHits } from "../core/CombatSystem";
@@ -49,6 +55,7 @@ export class ArenaScene extends Phaser.Scene {
   private bg!: Phaser.GameObjects.Graphics;
   private gfx!: Phaser.GameObjects.Graphics;
   private fx!: Phaser.GameObjects.Graphics;
+  private fighterSprites = new Map<Fighter, Phaser.GameObjects.Sprite>();
   private announce!: Phaser.GameObjects.Text;
   private sparks: Spark[] = [];
   private floats: FloatText[] = [];
@@ -70,6 +77,18 @@ export class ArenaScene extends Phaser.Scene {
     this.sceneData = data;
   }
 
+  preload() {
+    for (const id of new Set([this.sceneData.p1, this.sceneData.p2])) {
+      const config = FIGHTER_SPRITES[id];
+      if (config.sheet) {
+        this.load.spritesheet(spriteTextureKey(id), config.sheet, {
+          frameWidth: config.frameWidth,
+          frameHeight: config.frameHeight,
+        });
+      }
+    }
+  }
+
   create() {
     const { p1, p2, difficulty } = this.sceneData;
     this.f1 = new Fighter(FIGHTERS[p1], 380, 1);
@@ -80,6 +99,8 @@ export class ArenaScene extends Phaser.Scene {
     this.drawBackground();
     this.gfx = this.add.graphics();
     this.fx = this.add.graphics();
+    this.prepareFighterSprite(this.f1);
+    this.prepareFighterSprite(this.f2);
 
     this.announce = this.add
       .text(COMBAT.ARENA_WIDTH / 2, 300, "PREPARAR", {
@@ -95,6 +116,7 @@ export class ArenaScene extends Phaser.Scene {
     this.events.on("shutdown", () => {
       this.sparks = [];
       this.floats = [];
+      this.fighterSprites.clear();
     });
   }
 
@@ -336,8 +358,8 @@ export class ArenaScene extends Phaser.Scene {
   private render(dt: number) {
     const g = this.gfx;
     g.clear();
-    this.drawFighter(g, this.f2, false);
-    this.drawFighter(g, this.f1, true);
+    this.drawFighter(g, this.f2, false, this.syncFighterSprite(this.f2));
+    this.drawFighter(g, this.f1, true, this.syncFighterSprite(this.f1));
 
     // efeitos
     const fx = this.fx;
@@ -410,7 +432,57 @@ export class ArenaScene extends Phaser.Scene {
     });
   }
 
-  private drawFighter(g: Phaser.GameObjects.Graphics, f: Fighter, isP1: boolean) {
+  private prepareFighterSprite(f: Fighter) {
+    const config = FIGHTER_SPRITES[f.stats.id];
+    const texture = spriteTextureKey(f.stats.id);
+    if (!config.sheet || !this.textures.exists(texture)) return;
+
+    for (const [state, animation] of Object.entries(config.animations) as [
+      FighterAnimation,
+      (typeof config.animations)[FighterAnimation],
+    ][]) {
+      const key = spriteAnimationKey(f.stats.id, state);
+      if (!this.anims.exists(key)) {
+        this.anims.create({
+          key,
+          frames: this.anims.generateFrameNumbers(texture, {
+            start: animation.start,
+            end: animation.end,
+          }),
+          frameRate: animation.frameRate,
+          repeat: animation.repeat,
+        });
+      }
+    }
+
+    const sprite = this.add
+      .sprite(f.x, f.y, texture)
+      .setOrigin(0.5, 1)
+      .setScale(config.displayScale);
+    this.fighterSprites.set(f, sprite);
+  }
+
+  /** Sincroniza a representação Phaser sem alterar a simulação de combate. */
+  private syncFighterSprite(f: Fighter) {
+    const sprite = this.fighterSprites.get(f);
+    if (!sprite) return false;
+    const animation: FighterAnimation = f.state === "attack" ? (f.attackKind ?? "idle") : f.state;
+    const key = spriteAnimationKey(f.stats.id, animation);
+    const hurtFlash = f.flash > 0 && Math.floor(f.flash * 40) % 2 === 0;
+    sprite
+      .setPosition(f.x, f.y)
+      .setFlipX(f.facing === -1)
+      .setAlpha(hurtFlash ? 0.55 : 1);
+    if (sprite.anims.currentAnim?.key !== key) sprite.play(key, true);
+    return true;
+  }
+
+  private drawFighter(
+    g: Phaser.GameObjects.Graphics,
+    f: Fighter,
+    isP1: boolean,
+    hasSprite: boolean,
+  ) {
     const s = f.stats;
     const x = f.x;
     const y = f.y;
@@ -427,6 +499,12 @@ export class ArenaScene extends Phaser.Scene {
       W * 1.25 - airLift * 0.08,
       16,
     );
+
+    if (hasSprite) {
+      g.fillStyle(isP1 ? 0x2f82ff : 0xff2f3c, 0.9);
+      g.fillTriangle(x - 12, y - H - 34, x + 12, y - H - 34, x, y - H - 16);
+      return;
+    }
 
     const hurtFlash = f.flash > 0 && Math.floor(f.flash * 40) % 2 === 0;
     const body = hurtFlash ? 0xffffff : s.color;

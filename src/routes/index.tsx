@@ -9,6 +9,7 @@ import {
 } from "react";
 import { FIGHTERS, FIGHTER_LIST, type FighterId } from "../game/config/fighters";
 import type { Difficulty } from "../game/config/combat";
+import { FIGHTER_SPRITES } from "../game/config/sprites";
 import { GameBus } from "../game/core/bus";
 import { LocalInput, type ActionKey } from "../game/core/input";
 import type { MatchSnapshot } from "../game/core/types";
@@ -26,7 +27,7 @@ const DIFFICULTIES: { id: Difficulty; name: string; detail: string }[] = [
 
 function FightApp() {
   const [screen, setScreen] = useState<Screen>("menu");
-  const [fighter, setFighter] = useState<FighterId>("vex");
+  const [fighter, setFighter] = useState<FighterId>("dictador");
   const [difficulty, setDifficulty] = useState<Difficulty>("normal");
   const [sound, setSound] = useState(true);
 
@@ -111,7 +112,13 @@ function FightApp() {
                 }}
               >
                 <span className="ac-fighter-number">0{FIGHTER_LIST.indexOf(item) + 1}</span>
-                <span className="ac-fighter-silhouette">{item.name[0]}</span>
+                <span className="ac-fighter-silhouette">
+                  {FIGHTER_SPRITES[item.id].portrait ? (
+                    <img src={FIGHTER_SPRITES[item.id].portrait ?? undefined} alt="" />
+                  ) : (
+                    <span aria-hidden="true">{item.name[0]}</span>
+                  )}
+                </span>
                 <span className="ac-fighter-name">{item.name}</span>
                 <span className="ac-fighter-epithet">{item.epithet}</span>
                 <span className="ac-fighter-description">{item.description}</span>
@@ -310,7 +317,7 @@ function FightScreen({
           <span>ROUND 1</span>
           <b>{String(snapshot?.timeLeft ?? 99).padStart(2, "0")}</b>
         </div>
-        <HudFighter fighter={p2} side="right" fallback="titan" />
+        <HudFighter fighter={p2} side="right" fallback="holofokiu" />
       </div>
       <button className="ac-pause-button" onClick={togglePause} aria-label="Pausar partida">
         Ⅱ
