@@ -82,6 +82,19 @@ export const FIGHTER_SPRITES: Record<FighterId, FighterSpriteDef> = {
     ...pendingSprite(),
     portrait: "/assets/fighters/holofokiu-portrait.png",
     idleImage: "/assets/fighters/holofokiu-idle.png",
+    animations: {
+      idle: {
+        asset: "/assets/fighters/holofokiu-idle-sheet.png",
+        frameWidth: 256,
+        frameHeight: 256,
+        frameCount: 6,
+        frameRate: 8,
+        repeat: -1,
+        offsetX: -6,
+        offsetY: 2,
+        scale: 0.93,
+      },
+    },
   },
 };
 
