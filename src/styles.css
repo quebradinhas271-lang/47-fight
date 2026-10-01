@@ -433,14 +433,13 @@
 .ac-fighter-card {
   --fighter: var(--accent);
   position: relative;
-  min-height: 390px;
+  min-height: 330px;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: minmax(0, 56%) minmax(0, 44%);
   text-align: left;
   color: var(--foreground);
-  padding: 1.25rem;
+  padding: 0;
   background: linear-gradient(
     160deg,
     color-mix(in oklch, var(--fighter) 13%, var(--card)),
@@ -471,12 +470,20 @@
   color: var(--fighter-accent);
   font-weight: 700;
 }
+.ac-fighter-info {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: linear-gradient(90deg, #11131bf2, #11131be8);
+}
 .ac-fighter-silhouette {
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 58%;
-  height: 62%;
+  position: relative;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   font: 700 15rem/0.8 var(--font-display);
   color: color-mix(in oklch, var(--fighter) 24%, transparent);
@@ -492,10 +499,17 @@
   display: block;
 }
 .ac-fighter-name {
-  margin-top: 6rem;
-  font: 700 3.8rem/0.8 var(--font-display);
+  margin-top: 0.45rem;
+  max-width: 100%;
+  font: 700 clamp(2rem, 4vw, 3.2rem)/0.82 var(--font-display);
   color: var(--fighter-accent);
-  z-index: 1;
+  overflow-wrap: normal;
+  word-break: normal;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 .ac-fighter-epithet {
   text-transform: uppercase;
@@ -537,7 +551,7 @@
   background: var(--fighter);
 }
 .ac-special {
-  margin-top: 1rem;
+  margin-top: 0.65rem;
   color: var(--fighter-accent);
   font-size: 0.7rem;
   font-weight: 700;
@@ -746,12 +760,38 @@
   justify-content: space-between;
   pointer-events: none;
 }
-.ac-dpad,
 .ac-attacks {
   display: flex;
   align-items: end;
   gap: 0.5rem;
   pointer-events: auto;
+}
+.ac-joystick {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  border: 2px solid #ffffff55;
+  background: radial-gradient(circle, #ffffff12 0 20%, #10131dcc 21% 100%);
+  box-shadow: inset 0 0 24px #0009;
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  overscroll-behavior: contain;
+}
+.ac-joystick > span {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 2px solid #ffffff80;
+  background: var(--gradient-primary);
+  box-shadow:
+    var(--glow-primary),
+    0 5px 12px #0008;
+  pointer-events: none;
+  transition: transform 35ms linear;
 }
 .ac-touch-btn {
   width: 58px;
@@ -793,10 +833,11 @@
     padding: 0.5rem;
   }
   .ac-fighter-card {
-    min-height: 280px;
+    min-height: 250px;
+    grid-template-columns: minmax(0, 62%) minmax(110px, 38%);
   }
   .ac-fighter-name {
-    margin-top: 2rem;
+    font-size: clamp(1.9rem, 9vw, 2.8rem);
   }
   .ac-actions {
     grid-template-columns: 1fr 1.8fr;
@@ -865,8 +906,15 @@
   .ac-touch-controls {
     inset-inline: 0.5rem;
   }
-  .ac-dpad,
   .ac-attacks {
     gap: 0.25rem;
+  }
+  .ac-joystick {
+    width: 112px;
+    height: 112px;
+  }
+  .ac-joystick > span {
+    width: 48px;
+    height: 48px;
   }
 }

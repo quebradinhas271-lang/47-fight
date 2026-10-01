@@ -59,10 +59,7 @@ export class ArenaScene extends Phaser.Scene {
   private bg!: Phaser.GameObjects.Graphics;
   private gfx!: Phaser.GameObjects.Graphics;
   private fx!: Phaser.GameObjects.Graphics;
-  private fighterSprites = new Map<
-    Fighter,
-    Phaser.GameObjects.Image | Phaser.GameObjects.Sprite
-  >();
+  private fighterSprites = new Map<Fighter, Phaser.GameObjects.Image | Phaser.GameObjects.Sprite>();
   private announce!: Phaser.GameObjects.Text;
   private sparks: Spark[] = [];
   private floats: FloatText[] = [];
@@ -151,8 +148,12 @@ export class ArenaScene extends Phaser.Scene {
     this.paused = false;
     this.introTimer = 2;
     this.endTimer = 0;
+    this.accumulator = 0;
+    this.hitStop = 0;
+    this.shake = 0;
     this.sparks = [];
     this.floats = [];
+    this.floatObjects.forEach((item) => item.setVisible(false));
     this.announce.setText("PREPARAR").setAlpha(1);
     this.sceneData.input.resetAll();
     this.emitSnapshot();
@@ -505,10 +506,7 @@ export class ArenaScene extends Phaser.Scene {
       .setPosition(f.x, visualY)
       .setFlipX(f.facing === -1)
       .setAlpha(hurtFlash ? 0.55 : 1);
-    if (
-      sprite instanceof Phaser.GameObjects.Sprite &&
-      sprite.anims.currentAnim?.key !== key
-    ) {
+    if (sprite instanceof Phaser.GameObjects.Sprite && sprite.anims.currentAnim?.key !== key) {
       sprite.play(key, true);
     }
     return true;
