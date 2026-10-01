@@ -24,6 +24,10 @@ export interface SpriteAnimationDef {
 export interface FighterSpriteDef {
   /** Retrato opcional; null mantém o monograma seguro da seleção. */
   portrait: string | null;
+  /** Frame único usado na arena enquanto as animações oficiais não chegam. */
+  idleImage: string | null;
+  /** Altura visual do frame base; não interfere na hitbox da simulação. */
+  idleDisplayHeight: number;
   /** Spritesheet opcional; null impede que o Phaser solicite um arquivo ausente. */
   sheet: string | null;
   frameWidth: number;
@@ -48,6 +52,8 @@ const animationLayout: Record<FighterAnimation, SpriteAnimationDef> = {
 
 const pendingSprite = (): FighterSpriteDef => ({
   portrait: null,
+  idleImage: null,
+  idleDisplayHeight: 230,
   sheet: null,
   frameWidth: 256,
   frameHeight: 256,
@@ -56,20 +62,23 @@ const pendingSprite = (): FighterSpriteDef => ({
 });
 
 /**
- * Contrato dos assets oficiais. Os retratos são usados na seleção, enquanto as
- * spritesheets permanecem desativadas e a arena continua usando seu fallback.
+ * Contrato dos assets oficiais. Os frames únicos representam os lutadores na
+ * arena, enquanto as spritesheets permanecem preparadas para animações futuras.
  */
 export const FIGHTER_SPRITES: Record<FighterId, FighterSpriteDef> = {
   dictador: {
     ...pendingSprite(),
     portrait: "/assets/fighters/el-dictador-portrait.png",
+    idleImage: "/assets/fighters/el-dictador-idle.png",
   },
   holofokiu: {
     ...pendingSprite(),
     portrait: "/assets/fighters/holofokiu-portrait.png",
+    idleImage: "/assets/fighters/holofokiu-idle.png",
   },
 };
 
 export const spriteTextureKey = (fighter: FighterId) => `fighter-${fighter}`;
+export const idleTextureKey = (fighter: FighterId) => `fighter-${fighter}-idle`;
 export const spriteAnimationKey = (fighter: FighterId, animation: FighterAnimation) =>
   `${spriteTextureKey(fighter)}-${animation}`;
