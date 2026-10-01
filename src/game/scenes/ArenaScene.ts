@@ -48,6 +48,9 @@ interface FloatText {
   color: string;
 }
 
+/** Compensa a pequena margem inferior dos PNGs sem deslocar a simulação/hitbox. */
+const IDLE_IMAGE_GROUND_OFFSET = 4;
+
 export class ArenaScene extends Phaser.Scene {
   private sceneData!: ArenaSceneData;
   private f1!: Fighter;
@@ -191,9 +194,10 @@ export class ArenaScene extends Phaser.Scene {
         ? this.ai.update(dt, this.f2, this.f1, frozen)
         : { ...EMPTY_INPUT };
 
+    const previousSeparation = this.f2.x - this.f1.x;
     this.f1.step(dt, i1, this.f2.x, frozen);
     this.f2.step(dt, i2, this.f1.x, frozen);
-    this.pushApart();
+    this.pushApart(previousSeparation);
 
     const hits = resolveHits(this.f1, this.f2, this.over);
     for (const h of hits) {
@@ -213,17 +217,24 @@ export class ArenaScene extends Phaser.Scene {
     this.emitSnapshot();
   }
 
-  /** impede sobreposição total dos corpos */
-  private pushApart() {
+  /** Impede cruzamento de corpos, exceto quando um lutador passa por cima do outro. */
+  private pushApart(previousSeparation: number) {
+    const verticalOverlap =
+      Math.min(this.f1.y, this.f2.y) -
+      Math.max(this.f1.y - COMBAT.BODY_HEIGHT, this.f2.y - COMBAT.BODY_HEIGHT);
+    if (verticalOverlap <= 0) return;
+
     const minDist = COMBAT.BODY_WIDTH * 0.85;
     const d = this.f2.x - this.f1.x;
     const abs = Math.abs(d);
-    if (abs < minDist && abs > 0.0001) {
-      const push = (minDist - abs) / 2;
-      const dir = Math.sign(d);
-      this.f1.x -= push * dir;
-      this.f2.x += push * dir;
-    }
+    if (abs >= minDist) return;
+
+    // Enquanto os corpos se sobrepõem verticalmente, preserva a ordem anterior
+    // para que um passo grande da simulação não permita atravessar no chão.
+    const dir = previousSeparation < 0 ? -1 : 1;
+    const midpoint = (this.f1.x + this.f2.x) / 2;
+    this.f1.x = midpoint - (dir * minDist) / 2;
+    this.f2.x = midpoint + (dir * minDist) / 2;
   }
 
   private finish() {
@@ -472,7 +483,9 @@ export class ArenaScene extends Phaser.Scene {
     const idleTexture = idleTextureKey(f.stats.id);
     if (!config.idleImage || !this.textures.exists(idleTexture)) return;
 
-    const image = this.add.image(f.x, f.y, idleTexture).setOrigin(0.5, 1);
+    const image = this.add
+      .image(f.x, f.y + IDLE_IMAGE_GROUND_OFFSET, idleTexture)
+      .setOrigin(0.5, 1);
     image.setScale(config.idleDisplayHeight / image.height);
     this.fighterSprites.set(f, image);
   }
@@ -484,8 +497,12 @@ export class ArenaScene extends Phaser.Scene {
     const animation: FighterAnimation = f.state === "attack" ? (f.attackKind ?? "idle") : f.state;
     const key = spriteAnimationKey(f.stats.id, animation);
     const hurtFlash = f.flash > 0 && Math.floor(f.flash * 40) % 2 === 0;
+    let visualY = f.y;
+    if (!(sprite instanceof Phaser.GameObjects.Sprite)) {
+      visualY += IDLE_IMAGE_GROUND_OFFSET;
+    }
     sprite
-      .setPosition(f.x, f.y)
+      .setPosition(f.x, visualY)
       .setFlipX(f.facing === -1)
       .setAlpha(hurtFlash ? 0.55 : 1);
     if (

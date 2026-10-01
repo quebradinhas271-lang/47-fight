@@ -164,8 +164,14 @@ export class Fighter {
 
     const act = !frozen && this.state !== "ko" && this.state !== "win";
 
-    // orientação automática (apenas quando livre e no chão)
-    if (act && (this.state === "idle" || this.state === "walk")) {
+    // Mantém os lutadores frente a frente, inclusive depois de uma passagem aérea.
+    if (
+      act &&
+      (this.state === "idle" ||
+        this.state === "walk" ||
+        this.state === "jump" ||
+        this.state === "fall")
+    ) {
       this.facing = opponentX >= this.x ? 1 : -1;
     }
 
