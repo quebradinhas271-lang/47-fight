@@ -427,7 +427,7 @@
 }
 .ac-roster {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
 }
 .ac-fighter-card {
@@ -473,11 +473,23 @@
 }
 .ac-fighter-silhouette {
   position: absolute;
-  right: -0.02em;
-  top: 0.05em;
+  right: 0;
+  top: 0;
+  width: 58%;
+  height: 62%;
+  overflow: hidden;
   font: 700 15rem/0.8 var(--font-display);
   color: color-mix(in oklch, var(--fighter) 24%, transparent);
   filter: drop-shadow(-10px 0 0 color-mix(in oklch, var(--fighter) 10%, transparent));
+}
+.ac-fighter-silhouette img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+}
+.ac-fighter-silhouette > span {
+  display: block;
 }
 .ac-fighter-name {
   margin-top: 6rem;
