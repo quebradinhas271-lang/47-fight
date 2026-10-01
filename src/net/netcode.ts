@@ -27,7 +27,10 @@ export interface NetClient {
   setReady(ready: boolean): Promise<void>;
   sendInput(tick: number, input: InputState): void;
   leave(): void;
-  on(event: "state" | "start" | "snapshot" | "error" | "disconnect", cb: (payload: unknown) => void): () => void;
+  on(
+    event: "state" | "start" | "snapshot" | "error" | "disconnect",
+    cb: (payload: unknown) => void,
+  ): () => void;
 }
 
 export const MULTIPLAYER_MISSING = [

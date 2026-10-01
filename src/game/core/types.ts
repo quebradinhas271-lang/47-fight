@@ -22,15 +22,7 @@ export const EMPTY_INPUT: InputState = {
 };
 
 export type FighterState =
-  | "idle"
-  | "walk"
-  | "jump"
-  | "fall"
-  | "attack"
-  | "block"
-  | "hurt"
-  | "ko"
-  | "win";
+  "idle" | "walk" | "jump" | "fall" | "attack" | "block" | "hurt" | "ko" | "win";
 
 export interface Rect {
   x: number;

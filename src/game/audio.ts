@@ -2,6 +2,11 @@
 let ctx: AudioContext | null = null;
 let enabled = true;
 
+type WebkitAudioWindow = Window &
+  typeof globalThis & {
+    webkitAudioContext?: typeof AudioContext;
+  };
+
 export const sfx = {
   setEnabled(v: boolean) {
     enabled = v;
@@ -12,7 +17,10 @@ export const sfx = {
   play(kind: "click" | "back" | "hit" | "block" | "special" | "ko") {
     if (!enabled || typeof window === "undefined") return;
     try {
-      ctx ||= new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass =
+        window.AudioContext || (window as WebkitAudioWindow).webkitAudioContext;
+      if (!AudioContextClass) return;
+      ctx ||= new AudioContextClass();
       if (ctx.state === "suspended") void ctx.resume();
       const now = ctx.currentTime;
       const presets = {

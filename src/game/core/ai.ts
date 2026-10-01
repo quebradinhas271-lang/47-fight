@@ -3,14 +3,7 @@ import type { Fighter } from "./Fighter";
 import { EMPTY_INPUT, type InputState } from "./types";
 
 type AiState =
-  | "approach"
-  | "spacing"
-  | "attack"
-  | "defend"
-  | "jump"
-  | "retreat"
-  | "special"
-  | "recover";
+  "approach" | "spacing" | "attack" | "defend" | "jump" | "retreat" | "special" | "recover";
 
 interface Profile {
   reaction: number;
@@ -22,9 +15,30 @@ interface Profile {
 }
 
 const PROFILES: Record<Difficulty, Profile> = {
-  facil: { reaction: 0.55, blockChance: 0.12, aggression: 0.35, spacingBias: 0.2, jumpChance: 0.08, specialChance: 0.15 },
-  normal: { reaction: 0.3, blockChance: 0.38, aggression: 0.6, spacingBias: 0.45, jumpChance: 0.14, specialChance: 0.4 },
-  dificil: { reaction: 0.14, blockChance: 0.62, aggression: 0.82, spacingBias: 0.7, jumpChance: 0.18, specialChance: 0.75 },
+  facil: {
+    reaction: 0.55,
+    blockChance: 0.12,
+    aggression: 0.35,
+    spacingBias: 0.2,
+    jumpChance: 0.08,
+    specialChance: 0.15,
+  },
+  normal: {
+    reaction: 0.3,
+    blockChance: 0.38,
+    aggression: 0.6,
+    spacingBias: 0.45,
+    jumpChance: 0.14,
+    specialChance: 0.4,
+  },
+  dificil: {
+    reaction: 0.14,
+    blockChance: 0.62,
+    aggression: 0.82,
+    spacingBias: 0.7,
+    jumpChance: 0.18,
+    specialChance: 0.75,
+  },
 };
 
 /**
@@ -84,8 +98,7 @@ export class FighterAI {
       return;
     }
 
-    const canSpecial =
-      me.energy >= me.stats.attacks.special.energyCost && me.specialCooldown <= 0;
+    const canSpecial = me.energy >= me.stats.attacks.special.energyCost && me.specialCooldown <= 0;
     if (canSpecial && dist < specialRange && Math.random() < p.specialChance) {
       this.state = "special";
       return;
@@ -107,7 +120,8 @@ export class FighterAI {
       return;
     }
 
-    this.state = dist > lightRange ? "approach" : Math.random() < p.spacingBias ? "spacing" : "approach";
+    this.state =
+      dist > lightRange ? "approach" : Math.random() < p.spacingBias ? "spacing" : "approach";
   }
 
   private act(me: Fighter, foe: Fighter): InputState {
