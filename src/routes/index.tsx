@@ -17,18 +17,13 @@ import { sfx } from "../game/audio";
 
 export const Route = createFileRoute("/")({ component: FightApp });
 
-type Screen = "menu" | "fighter" | "difficulty" | "fight";
-
-const DIFFICULTIES: { id: Difficulty; name: string; detail: string }[] = [
-  { id: "facil", name: "Fácil", detail: "IA mais paciente e menos agressiva" },
-  { id: "normal", name: "Normal", detail: "O equilíbrio ideal para começar" },
-  { id: "dificil", name: "Difícil", detail: "Reações rápidas e pressão máxima" },
-];
+type Screen = "menu" | "fighter" | "opponent" | "fight";
 
 function FightApp() {
   const [screen, setScreen] = useState<Screen>("menu");
   const [fighter, setFighter] = useState<FighterId>("dictador");
-  const [difficulty, setDifficulty] = useState<Difficulty>("normal");
+  const [opponent, setOpponent] = useState<FighterId>("holofokiu");
+  const difficulty: Difficulty = "normal";
   const [sound, setSound] = useState(true);
 
   const navigate = (next: Screen, back = false) => {
@@ -40,6 +35,7 @@ function FightApp() {
     return (
       <FightScreen
         fighter={fighter}
+        opponent={opponent}
         difficulty={difficulty}
         sound={sound}
         onMenu={() => navigate("menu", true)}
@@ -94,82 +90,30 @@ function FightApp() {
             title="Escolha seu lutador"
             subtitle="Cada estilo exige uma estratégia"
           />
-          <div className="ac-roster">
-            {FIGHTER_LIST.map((item) => (
-              <button
-                key={item.id}
-                className="ac-fighter-card"
-                data-selected={fighter === item.id}
-                style={
-                  {
-                    "--fighter": item.cssColor,
-                    "--fighter-accent": item.cssAccent,
-                  } as CSSProperties
-                }
-                onClick={() => {
-                  setFighter(item.id);
-                  sfx.play("click");
-                }}
-              >
-                <span className="ac-fighter-number">0{FIGHTER_LIST.indexOf(item) + 1}</span>
-                <span className="ac-fighter-silhouette">
-                  <FighterPortrait fighter={item.id} name={item.name} />
-                </span>
-                <span className="ac-fighter-name">{item.name}</span>
-                <span className="ac-fighter-epithet">{item.epithet}</span>
-                <span className="ac-fighter-description">{item.description}</span>
-                <span className="ac-stats">
-                  <Stat label="VIDA" value={item.maxHp / 1.3} />
-                  <Stat label="VELOCIDADE" value={item.speed / 2.65} />
-                  <Stat label="ATAQUE" value={item.attacks.heavy.damage * 5} />
-                </span>
-                <span className="ac-special">ESPECIAL // {item.specialName}</span>
-              </button>
-            ))}
-          </div>
+          <FighterRoster selected={fighter} onSelect={setFighter} />
           <div className="ac-actions">
             <button className="ac-btn" data-variant="ghost" onClick={() => navigate("menu", true)}>
               ‹ Voltar
             </button>
-            <button className="ac-btn" data-variant="solid" onClick={() => navigate("difficulty")}>
+            <button className="ac-btn" data-variant="solid" onClick={() => navigate("opponent")}>
               Confirmar {FIGHTERS[fighter].name} ›
             </button>
           </div>
         </section>
       )}
 
-      {screen === "difficulty" && (
-        <section className="ac-setup ac-fade-in ac-setup--narrow">
+      {screen === "opponent" && (
+        <section className="ac-setup ac-fade-in">
           <StepTitle
             step="02"
-            title="Nível da ameaça"
-            subtitle="Escolha a intensidade do adversário"
+            title="Escolha seu adversário"
+            subtitle="Selecione o lutador controlado pela IA"
           />
-          <div className="ac-difficulties">
-            {DIFFICULTIES.map((item, index) => (
-              <button
-                className="ac-difficulty"
-                data-selected={difficulty === item.id}
-                key={item.id}
-                onClick={() => {
-                  setDifficulty(item.id);
-                  sfx.play("click");
-                }}
-              >
-                <span className="ac-threat">
-                  {Array.from({ length: 3 }, (_, i) => (
-                    <i key={i} data-on={i <= index} />
-                  ))}
-                </span>
-                <b>{item.name}</b>
-                <small>{item.detail}</small>
-              </button>
-            ))}
-          </div>
+          <FighterRoster selected={opponent} onSelect={setOpponent} />
           <div className="ac-versus">
             <span style={{ color: FIGHTERS[fighter].cssColor }}>{FIGHTERS[fighter].name}</span>
             <em>VS</em>
-            <span className="ac-enemy">?</span>
+            <span style={{ color: FIGHTERS[opponent].cssColor }}>{FIGHTERS[opponent].name}</span>
           </div>
           <div className="ac-actions">
             <button
@@ -180,7 +124,7 @@ function FightApp() {
               ‹ Voltar
             </button>
             <button className="ac-btn" data-variant="solid" onClick={() => navigate("fight")}>
-              Entrar na arena ›
+              Confirmar {FIGHTERS[opponent].name} ›
             </button>
           </div>
         </section>
@@ -221,6 +165,49 @@ function Stat({ label, value }: { label: string; value: number }) {
   );
 }
 
+function FighterRoster({
+  selected,
+  onSelect,
+}: {
+  selected: FighterId;
+  onSelect: (fighter: FighterId) => void;
+}) {
+  return (
+    <div className="ac-roster">
+      {FIGHTER_LIST.map((item, index) => (
+        <button
+          key={item.id}
+          className="ac-fighter-card"
+          data-selected={selected === item.id}
+          style={
+            { "--fighter": item.cssColor, "--fighter-accent": item.cssAccent } as CSSProperties
+          }
+          onClick={() => {
+            onSelect(item.id);
+            sfx.play("click");
+          }}
+        >
+          <span className="ac-fighter-info">
+            <span className="ac-fighter-number">{String(index + 1).padStart(2, "0")}</span>
+            <span className="ac-fighter-name">{item.name}</span>
+            <span className="ac-fighter-epithet">{item.epithet}</span>
+            <span className="ac-fighter-description">{item.description}</span>
+            <span className="ac-stats">
+              <Stat label="VIDA" value={item.maxHp / 1.3} />
+              <Stat label="VELOCIDADE" value={item.speed / 2.65} />
+              <Stat label="ATAQUE" value={item.attacks.heavy.damage * 5} />
+            </span>
+            <span className="ac-special">ESPECIAL // {item.specialName}</span>
+          </span>
+          <span className="ac-fighter-silhouette">
+            <FighterPortrait fighter={item.id} name={item.name} />
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function FighterPortrait({ fighter, name }: { fighter: FighterId; name: string }) {
   const portrait = FIGHTER_SPRITES[fighter].portrait;
   const [loadFailed, setLoadFailed] = useState(false);
@@ -232,11 +219,13 @@ function FighterPortrait({ fighter, name }: { fighter: FighterId; name: string }
 
 function FightScreen({
   fighter,
+  opponent,
   difficulty,
   sound,
   onMenu,
 }: {
   fighter: FighterId;
+  opponent: FighterId;
   difficulty: Difficulty;
   sound: boolean;
   onMenu: () => void;
@@ -265,8 +254,6 @@ function FightScreen({
     let cancelled = false;
     void import("../game/createGame").then(({ createGame, getArenaScene }) => {
       if (cancelled || !host.current) return;
-      const enemies = FIGHTER_LIST.filter((item) => item.id !== fighter);
-      const opponent = enemies[Math.floor(Math.random() * enemies.length)]!.id;
       const game = createGame(host.current, {
         p1: fighter,
         p2: opponent,
@@ -287,7 +274,7 @@ function FightScreen({
       gameRef.current = null;
       sceneRef.current = null;
     };
-  }, [difficulty, fighter, sound]);
+  }, [difficulty, fighter, opponent, sound]);
 
   const togglePause = useCallback(() => {
     if (snapshot?.over) return;
@@ -322,7 +309,7 @@ function FightScreen({
           <span>ROUND 1</span>
           <b>{String(snapshot?.timeLeft ?? 99).padStart(2, "0")}</b>
         </div>
-        <HudFighter fighter={p2} side="right" fallback="holofokiu" />
+        <HudFighter fighter={p2} side="right" fallback={opponent} />
       </div>
       <button className="ac-pause-button" onClick={togglePause} aria-label="Pausar partida">
         Ⅱ
@@ -367,7 +354,13 @@ function FightScreen({
               data-variant="solid"
               onClick={() => {
                 sfx.play("click");
-                sceneRef.current?.resetMatch();
+                const scene =
+                  sceneRef.current ??
+                  (gameRef.current?.scene.getScene("arena") as
+                    import("../game/scenes/ArenaScene").ArenaScene | undefined) ??
+                  null;
+                sceneRef.current = scene;
+                scene?.resetMatch();
               }}
             >
               Revanche
@@ -416,6 +409,52 @@ function TouchControls({
 }: {
   touch: (action: ActionKey, down: boolean) => (event: PointerEvent) => void;
 }) {
+  const [stick, setStick] = useState({ x: 0, y: 0 });
+  const activePointer = useRef<number | null>(null);
+  const joystickActions = useRef({ left: false, right: false, up: false });
+  const JOYSTICK_DEADZONE = 0.22;
+  const JOYSTICK_JUMP_THRESHOLD = -0.45;
+
+  const updateJoystick = (event: PointerEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const rect = event.currentTarget.getBoundingClientRect();
+    const radius = rect.width / 2;
+    let x = (event.clientX - (rect.left + radius)) / radius;
+    let y = (event.clientY - (rect.top + radius)) / radius;
+    const length = Math.hypot(x, y);
+    if (length > 1) {
+      x /= length;
+      y /= length;
+    }
+    setStick({ x, y });
+    const left = x < -JOYSTICK_DEADZONE;
+    const right = x > JOYSTICK_DEADZONE;
+    const up = y < JOYSTICK_JUMP_THRESHOLD;
+    const emit = (action: "left" | "right" | "up", active: boolean) => {
+      if (joystickActions.current[action] === active) return;
+      joystickActions.current[action] = active;
+      const synthetic = {
+        preventDefault() {},
+        currentTarget: event.currentTarget,
+        pointerId: event.pointerId,
+      } as unknown as PointerEvent;
+      touch(action, active)(synthetic);
+    };
+    emit("left", left);
+    emit("right", right);
+    emit("up", up);
+  };
+
+  const resetJoystick = (event: PointerEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    if (activePointer.current !== event.pointerId) return;
+    for (const action of ["left", "right", "up"] as const) {
+      if (joystickActions.current[action]) touch(action, false)(event as unknown as PointerEvent);
+      joystickActions.current[action] = false;
+    }
+    activePointer.current = null;
+    setStick({ x: 0, y: 0 });
+  };
   const button = (action: ActionKey, label: string, className = "") => (
     <button
       className={`ac-touch-btn ${className}`}
@@ -428,13 +467,26 @@ function TouchControls({
   );
   return (
     <div className="ac-touch-controls">
-      <div className="ac-dpad">
-        {button("left", "◀")}
-        {button("up", "▲")}
-        {button("right", "▶")}
-        {button("block", "DEF", "ac-touch-small")}
+      <div
+        className="ac-joystick"
+        aria-label="Joystick de movimento"
+        onPointerDown={(event) => {
+          event.preventDefault();
+          activePointer.current = event.pointerId;
+          event.currentTarget.setPointerCapture(event.pointerId);
+          updateJoystick(event);
+        }}
+        onPointerMove={(event) => {
+          if (activePointer.current === event.pointerId) updateJoystick(event);
+        }}
+        onPointerUp={resetJoystick}
+        onPointerCancel={resetJoystick}
+        onLostPointerCapture={resetJoystick}
+      >
+        <span style={{ transform: `translate(${stick.x * 38}px, ${stick.y * 38}px)` }} />
       </div>
       <div className="ac-attacks">
+        {button("block", "DEF", "ac-touch-small")}
         {button("light", "J")}
         {button("heavy", "K")}
         {button("special", "L", "ac-touch-special")}

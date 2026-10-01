@@ -1,5 +1,10 @@
 import { COMBAT } from "../config/combat";
-import type { AttackDef, AttackKind, FighterStats } from "../config/fighters";
+import {
+  DEFAULT_JUMP_FORCE,
+  type AttackDef,
+  type AttackKind,
+  type FighterStats,
+} from "../config/fighters";
 import type { FighterState, InputState, Rect } from "./types";
 import { EMPTY_INPUT } from "./types";
 
@@ -221,7 +226,7 @@ export class Fighter {
         }
         // salto (sem salto infinito: exige estar no chão)
         if (input.up && this.onGround) {
-          this.vy = -this.stats.jumpForce;
+          this.vy = -(this.stats.jumpForce ?? DEFAULT_JUMP_FORCE);
           this.onGround = false;
           this.state = "jump";
         }
