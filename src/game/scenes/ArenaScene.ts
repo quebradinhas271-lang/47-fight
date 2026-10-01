@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import type { ArenaId } from "../config/arenas";
+import { ARENAS, type ArenaId } from "../config/arenas";
 import { COMBAT, type Difficulty } from "../config/combat";
 import { FIGHTERS, type FighterId } from "../config/fighters";
 import {
@@ -52,6 +52,8 @@ interface FloatText {
 
 /** Compensa a pequena margem inferior dos PNGs sem deslocar a simulação/hitbox. */
 const IDLE_IMAGE_GROUND_OFFSET = 4;
+const arenaTextureKey = (arena: ArenaId) => `arena-${arena}`;
+const arenaFallbackTextureKey = (arena: ArenaId) => `arena-${arena}-fallback`;
 
 export class ArenaScene extends Phaser.Scene {
   private sceneData!: ArenaSceneData;
@@ -86,6 +88,10 @@ export class ArenaScene extends Phaser.Scene {
   }
 
   preload() {
+    const arena = ARENAS[this.sceneData.arena];
+    this.load.image(arenaTextureKey(arena.id), arena.image);
+    this.load.image(arenaFallbackTextureKey(arena.id), arena.fallbackImage);
+
     const loadedSheets = new Set<string>();
     for (const id of new Set([this.sceneData.p1, this.sceneData.p2])) {
       const config = FIGHTER_SPRITES[id];
@@ -111,6 +117,7 @@ export class ArenaScene extends Phaser.Scene {
 
     this.bg = this.add.graphics();
     this.drawBackground();
+    this.createArenaBackground();
     this.gfx = this.add.graphics();
     this.fx = this.add.graphics();
     this.prepareFighterSprite(this.f1);
@@ -346,6 +353,24 @@ export class ArenaScene extends Phaser.Scene {
   }
 
   // ---------- desenho ----------
+  private createArenaBackground() {
+    const arena = this.sceneData.arena;
+    const officialKey = arenaTextureKey(arena);
+    const fallbackKey = arenaFallbackTextureKey(arena);
+    const textureKey = this.textures.exists(officialKey)
+      ? officialKey
+      : this.textures.exists(fallbackKey)
+        ? fallbackKey
+        : null;
+    if (!textureKey) return;
+
+    const image = this.add
+      .image(COMBAT.ARENA_WIDTH / 2, COMBAT.ARENA_HEIGHT / 2, textureKey)
+      .setOrigin(0.5);
+    const scale = Math.max(COMBAT.ARENA_WIDTH / image.width, COMBAT.ARENA_HEIGHT / image.height);
+    image.setScale(scale);
+  }
+
   private drawBackground() {
     const g = this.bg;
     const W = COMBAT.ARENA_WIDTH;

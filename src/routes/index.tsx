@@ -151,7 +151,14 @@ function FightApp() {
                   sfx.play("click");
                 }}
               >
-                <img src={item.image} alt={`Prévia da arena ${item.name}`} />
+                <img
+                  src={item.image}
+                  alt={`Prévia da arena ${item.name}`}
+                  onError={(event) => {
+                    event.currentTarget.onerror = null;
+                    event.currentTarget.src = item.fallbackImage;
+                  }}
+                />
                 <span className="ac-arena-copy">
                   <small>{String(index + 1).padStart(2, "0")} // ARENA</small>
                   <b>{item.name}</b>
