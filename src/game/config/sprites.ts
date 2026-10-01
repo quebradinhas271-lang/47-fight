@@ -14,56 +14,51 @@ export type FighterAnimation =
   | "heavy"
   | "special";
 
-export interface SpriteAnimationDef {
-  start: number;
-  end: number;
+interface SpriteAnimationBase {
+  /** Arquivo exclusivo desta animação. */
+  asset: string;
+  frameWidth: number;
+  frameHeight: number;
   frameRate: number;
   repeat: number;
+  /** Ajustes exclusivamente visuais em relação ao anchor corporal. */
+  offsetX?: number;
+  offsetY?: number;
+  /** Override opcional da escala visual do lutador. */
+  scale?: number;
 }
+
+/** Uma animação pode declarar a quantidade de frames ou um intervalo inclusivo. */
+export type SpriteAnimationDef = SpriteAnimationBase &
+  (
+    | { frameCount: number; start?: number; end?: never }
+    | { start: number; end: number; frameCount?: never }
+  );
 
 export interface FighterSpriteDef {
   /** Retrato opcional; null mantém o monograma seguro da seleção. */
   portrait: string | null;
   /** Frame único usado na arena enquanto as animações oficiais não chegam. */
   idleImage: string | null;
-  /** Altura visual do frame base; não interfere na hitbox da simulação. */
+  /** Altura visual do PNG estático legado; não interfere na hitbox. */
   idleDisplayHeight: number;
-  /** Spritesheet opcional; null impede que o Phaser solicite um arquivo ausente. */
-  sheet: string | null;
-  frameWidth: number;
-  frameHeight: number;
+  /** Escala padrão das spritesheets deste lutador. */
   displayScale: number;
-  animations: Record<FighterAnimation, SpriteAnimationDef>;
+  /** Cada estado é independente e pode ser adicionado gradualmente. */
+  animations: Partial<Record<FighterAnimation, SpriteAnimationDef>>;
 }
-
-const animationLayout: Record<FighterAnimation, SpriteAnimationDef> = {
-  idle: { start: 0, end: 5, frameRate: 8, repeat: -1 },
-  walk: { start: 6, end: 13, frameRate: 12, repeat: -1 },
-  jump: { start: 14, end: 16, frameRate: 10, repeat: 0 },
-  fall: { start: 17, end: 19, frameRate: 10, repeat: 0 },
-  block: { start: 20, end: 22, frameRate: 8, repeat: -1 },
-  hurt: { start: 23, end: 25, frameRate: 12, repeat: 0 },
-  ko: { start: 26, end: 31, frameRate: 10, repeat: 0 },
-  win: { start: 32, end: 39, frameRate: 10, repeat: -1 },
-  light: { start: 40, end: 44, frameRate: 14, repeat: 0 },
-  heavy: { start: 45, end: 51, frameRate: 12, repeat: 0 },
-  special: { start: 52, end: 60, frameRate: 14, repeat: 0 },
-};
 
 const pendingSprite = (): FighterSpriteDef => ({
   portrait: null,
   idleImage: null,
   idleDisplayHeight: 230,
-  sheet: null,
-  frameWidth: 256,
-  frameHeight: 256,
   displayScale: 0.75,
-  animations: animationLayout,
+  animations: {},
 });
 
 /**
- * Contrato dos assets oficiais. Os frames únicos representam os lutadores na
- * arena, enquanto as spritesheets permanecem preparadas para animações futuras.
+ * Contrato dos assets oficiais. Até uma animação ser configurada, a imagem
+ * estática (e, por último, o desenho vetorial) continua sendo o fallback.
  */
 export const FIGHTER_SPRITES: Record<FighterId, FighterSpriteDef> = {
   dictador: {
@@ -78,7 +73,10 @@ export const FIGHTER_SPRITES: Record<FighterId, FighterSpriteDef> = {
   },
 };
 
-export const spriteTextureKey = (fighter: FighterId) => `fighter-${fighter}`;
 export const idleTextureKey = (fighter: FighterId) => `fighter-${fighter}-idle`;
+
+/** A chave por asset permite compartilhar uma carga sem duplicá-la. */
+export const spriteTextureKey = (asset: string) => `fighter-sheet:${asset}`;
+
 export const spriteAnimationKey = (fighter: FighterId, animation: FighterAnimation) =>
-  `${spriteTextureKey(fighter)}-${animation}`;
+  `fighter-${fighter}-${animation}`;
