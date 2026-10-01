@@ -22,5 +22,6 @@ export function createGame(parent: HTMLElement, data: ArenaSceneData) {
 }
 
 export function getArenaScene(game: Phaser.Game): ArenaScene | null {
-  return (game.scene.getScene("arena") as ArenaScene) ?? null;
+  const scene = game.scene.getScene("arena");
+  return scene instanceof ArenaScene ? scene : null;
 }

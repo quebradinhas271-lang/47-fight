@@ -35,8 +35,7 @@ export function resolveHits(a: Fighter, b: Fighter, matchOver: boolean): HitEven
     const def = attacker.attack!;
     const dir: 1 | -1 = defender.x >= attacker.x ? 1 : -1;
     // defesa só funciona de frente para o ataque
-    const blocked =
-      defender.blocking && defender.state === "block" && defender.facing === -dir;
+    const blocked = defender.blocking && defender.state === "block" && defender.facing === -dir;
 
     const scaling = Math.pow(COMBAT.COMBO_DAMAGE_SCALING, attacker.comboCount);
     let damage = def.damage * scaling;

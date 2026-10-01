@@ -6,7 +6,12 @@ import { FighterAI } from "../core/ai";
 import { resolveHits } from "../core/CombatSystem";
 import type { GameBus } from "../core/bus";
 import type { LocalInput } from "../core/input";
-import { EMPTY_INPUT, type FighterSnapshot, type InputState, type MatchSnapshot } from "../core/types";
+import {
+  EMPTY_INPUT,
+  type FighterSnapshot,
+  type InputState,
+  type MatchSnapshot,
+} from "../core/types";
 
 export interface ArenaSceneData {
   p1: FighterId;
@@ -37,7 +42,7 @@ interface FloatText {
 }
 
 export class ArenaScene extends Phaser.Scene {
-  private data!: ArenaSceneData;
+  private sceneData!: ArenaSceneData;
   private f1!: Fighter;
   private f2!: Fighter;
   private ai!: FighterAI;
@@ -48,7 +53,7 @@ export class ArenaScene extends Phaser.Scene {
   private sparks: Spark[] = [];
   private floats: FloatText[] = [];
   private accumulator = 0;
-  private timeLeft = COMBAT.ROUND_TIME;
+  private timeLeft: number = COMBAT.ROUND_TIME;
   private over = false;
   private winner: "p1" | "p2" | "draw" | null = null;
   private paused = false;
@@ -62,11 +67,11 @@ export class ArenaScene extends Phaser.Scene {
   }
 
   init(data: ArenaSceneData) {
-    this.data = data;
+    this.sceneData = data;
   }
 
   create() {
-    const { p1, p2, difficulty } = this.data;
+    const { p1, p2, difficulty } = this.sceneData;
     this.f1 = new Fighter(FIGHTERS[p1], 380, 1);
     this.f2 = new Fighter(FIGHTERS[p2], 900, -1);
     this.ai = new FighterAI(difficulty);
@@ -95,7 +100,7 @@ export class ArenaScene extends Phaser.Scene {
 
   // ---------- controle externo (React) ----------
   setPaused(v: boolean) {
-    if (this.data.mode === "online") return; // pausa individual não é permitida online
+    if (this.sceneData.mode === "online") return; // pausa individual não é permitida online
     this.paused = v;
     this.emitSnapshot();
   }
@@ -117,12 +122,12 @@ export class ArenaScene extends Phaser.Scene {
     this.sparks = [];
     this.floats = [];
     this.announce.setText("PREPARAR").setAlpha(1);
-    this.data.input.resetAll();
+    this.sceneData.input.resetAll();
     this.emitSnapshot();
   }
 
   // ---------- loop ----------
-  update(_time: number, delta: number) {
+  override update(_time: number, delta: number) {
     const dtRaw = Math.min(delta / 1000, 0.25);
     if (!this.paused) {
       this.accumulator += dtRaw;
@@ -151,9 +156,11 @@ export class ArenaScene extends Phaser.Scene {
     }
 
     const frozen = intro || this.over;
-    const i1: InputState = frozen ? { ...EMPTY_INPUT } : this.data.input.sample();
+    const i1: InputState = frozen ? { ...EMPTY_INPUT } : this.sceneData.input.sample();
     const i2: InputState =
-      this.data.mode === "ai" ? this.ai.update(dt, this.f2, this.f1, frozen) : { ...EMPTY_INPUT };
+      this.sceneData.mode === "ai"
+        ? this.ai.update(dt, this.f2, this.f1, frozen)
+        : { ...EMPTY_INPUT };
 
     this.f1.step(dt, i1, this.f2.x, frozen);
     this.f2.step(dt, i2, this.f1.x, frozen);
@@ -212,7 +219,7 @@ export class ArenaScene extends Phaser.Scene {
       .setText(this.winner === "draw" ? "EMPATE" : this.winner === "p1" ? "K.O." : "K.O.")
       .setAlpha(1);
     this.shake = 16;
-    this.data.input.resetAll();
+    this.sceneData.input.resetAll();
   }
 
   private snap(f: Fighter): FighterSnapshot {
@@ -238,11 +245,18 @@ export class ArenaScene extends Phaser.Scene {
       winner: this.winner,
       paused: this.paused,
     };
-    this.data.bus.emit(s);
+    this.sceneData.bus.emit(s);
   }
 
   // ---------- efeitos ----------
-  private spawnHit(x: number, y: number, blocked: boolean, damage: number, heavy: boolean, color: string) {
+  private spawnHit(
+    x: number,
+    y: number,
+    blocked: boolean,
+    damage: number,
+    heavy: boolean,
+    color: string,
+  ) {
     const n = blocked ? 6 : heavy ? 18 : 11;
     const c = blocked ? 0x6fd7ff : heavy ? 0xff2f3c : 0xffd166;
     for (let i = 0; i < n; i++) {
@@ -330,6 +344,7 @@ export class ArenaScene extends Phaser.Scene {
     fx.clear();
     for (let i = this.sparks.length - 1; i >= 0; i--) {
       const s = this.sparks[i];
+      if (!s) continue;
       s.life += dt;
       if (s.life >= s.max) {
         this.sparks.splice(i, 1);
@@ -362,6 +377,7 @@ export class ArenaScene extends Phaser.Scene {
   private renderFloats(dt: number) {
     for (let i = this.floats.length - 1; i >= 0; i--) {
       const f = this.floats[i];
+      if (!f) continue;
       f.life += dt;
       f.y -= 40 * dt;
       if (f.life > 0.7) this.floats.splice(i, 1);
@@ -430,7 +446,6 @@ export class ArenaScene extends Phaser.Scene {
 
     const topY = y - H + crouch;
     const ko = f.state === "ko";
-
 
     const drawBody = () => {
       // pernas

@@ -3,7 +3,7 @@ import type { AttackDef, AttackKind, FighterStats } from "../config/fighters";
 import type { FighterState, InputState, Rect } from "./types";
 import { EMPTY_INPUT } from "./types";
 
-const frames = (f: number, speed: number) => (f / 60) / speed;
+const frames = (f: number, speed: number) => f / 60 / speed;
 
 /**
  * Entidade de combate pura (sem Phaser). Toda a física, máquina de estados e
@@ -119,7 +119,14 @@ export class Fighter {
   }
 
   /** chamado pelo sistema de combate quando este lutador é atingido */
-  takeHit(damage: number, knockback: number, launch: number, hitstun: number, fromDir: 1 | -1, blocked: boolean) {
+  takeHit(
+    damage: number,
+    knockback: number,
+    launch: number,
+    hitstun: number,
+    fromDir: 1 | -1,
+    blocked: boolean,
+  ) {
     this.hp = Math.max(0, this.hp - damage);
     this.flash = 0.15;
     if (blocked) {
