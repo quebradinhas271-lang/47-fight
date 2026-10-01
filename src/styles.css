@@ -918,3 +918,77 @@
     height: 48px;
   }
 }
+
+/* Arena selection */
+.ac-arena-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+.ac-arena-card {
+  position: relative;
+  padding: 0;
+  min-height: 310px;
+  overflow: hidden;
+  color: var(--foreground);
+  text-align: left;
+  background: var(--card);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: var(--transition-snap);
+}
+.ac-arena-card:hover,
+.ac-arena-card[data-selected="true"] {
+  transform: translateY(-7px);
+  border-color: var(--primary);
+  box-shadow: var(--glow-primary);
+}
+.ac-arena-card[data-selected="true"]::after {
+  content: "SELECIONADA";
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0.35rem 0.65rem;
+  background: var(--primary);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+.ac-arena-card img {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  display: block;
+}
+.ac-arena-copy {
+  display: grid;
+  gap: 0.3rem;
+  padding: 1rem;
+}
+.ac-arena-copy small {
+  color: var(--primary);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+.ac-arena-copy b {
+  font: 700 2rem/1 var(--font-display);
+  text-transform: uppercase;
+}
+.ac-arena-copy span {
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+}
+@media (max-width: 760px) {
+  .ac-arena-list {
+    grid-template-columns: 1fr;
+  }
+  .ac-arena-card {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 42% 1fr;
+  }
+  .ac-arena-card img {
+    height: 100%;
+    min-height: 145px;
+  }
+}
