@@ -65,6 +65,18 @@ export const FIGHTER_SPRITES: Record<FighterId, FighterSpriteDef> = {
     ...pendingSprite(),
     portrait: "/assets/fighters/el-dictador-portrait.png",
     idleImage: "/assets/fighters/el-dictador-idle.png",
+    animations: {
+      idle: {
+        asset: "/assets/fighters/el-dictador-idle-sheet.png",
+        frameWidth: 256,
+        frameHeight: 256,
+        frameCount: 6,
+        frameRate: 8,
+        repeat: -1,
+        offsetY: 4,
+        scale: 0.94,
+      },
+    },
   },
   holofokiu: {
     ...pendingSprite(),
