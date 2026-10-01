@@ -431,7 +431,6 @@ export class ArenaScene extends Phaser.Scene {
     const topY = y - H + crouch;
     const ko = f.state === "ko";
 
-    this.scene.scene.sys.game; // noop para manter tipo
 
     const drawBody = () => {
       // pernas
