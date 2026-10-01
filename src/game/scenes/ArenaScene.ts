@@ -72,6 +72,8 @@ export class ArenaScene extends Phaser.Scene {
   private endTimer = 0;
   private shake = 0;
   private hitStop = 0;
+  /** Lutador autorizado a concluir um cross-up depois de passar sobre a hurtbox rival. */
+  private airPasser: Fighter | null = null;
 
   constructor() {
     super("arena");
@@ -150,6 +152,7 @@ export class ArenaScene extends Phaser.Scene {
     this.endTimer = 0;
     this.accumulator = 0;
     this.hitStop = 0;
+    this.airPasser = null;
     this.shake = 0;
     this.sparks = [];
     this.floats = [];
@@ -220,9 +223,23 @@ export class ArenaScene extends Phaser.Scene {
 
   /** Impede cruzamento de corpos, exceto quando um lutador passa por cima do outro. */
   private pushApart(previousSeparation: number) {
-    const verticalOverlap =
-      Math.min(this.f1.y, this.f2.y) -
-      Math.max(this.f1.y - COMBAT.BODY_HEIGHT, this.f2.y - COMBAT.BODY_HEIGHT);
+    const h1 = this.f1.hurtbox();
+    const h2 = this.f2.hurtbox();
+    const f1CompletelyAbove = !this.f1.onGround && h1.y + h1.h <= h2.y;
+    const f2CompletelyAbove = !this.f2.onGround && h2.y + h2.h <= h1.y;
+
+    // A ausência de sobreposição vertical abre a passagem. Ela permanece aberta
+    // até o pouso para que a reentrada das hurtboxes durante a descida não puxe
+    // o saltador de volta para o lado de origem no meio do cross-up.
+    if (f1CompletelyAbove) this.airPasser = this.f1;
+    else if (f2CompletelyAbove) this.airPasser = this.f2;
+
+    if (this.airPasser) {
+      if (!this.airPasser.onGround) return;
+      this.airPasser = null;
+    }
+
+    const verticalOverlap = Math.min(h1.y + h1.h, h2.y + h2.h) - Math.max(h1.y, h2.y);
     if (verticalOverlap <= 0) return;
 
     const minDist = COMBAT.BODY_WIDTH * 0.85;
