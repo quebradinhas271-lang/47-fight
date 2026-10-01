@@ -84,15 +84,18 @@ export class ArenaScene extends Phaser.Scene {
   }
 
   preload() {
+    const loadedSheets = new Set<string>();
     for (const id of new Set([this.sceneData.p1, this.sceneData.p2])) {
       const config = FIGHTER_SPRITES[id];
       if (config.idleImage) {
         this.load.image(idleTextureKey(id), config.idleImage);
       }
-      if (config.sheet) {
-        this.load.spritesheet(spriteTextureKey(id), config.sheet, {
-          frameWidth: config.frameWidth,
-          frameHeight: config.frameHeight,
+      for (const animation of Object.values(config.animations)) {
+        if (!animation || loadedSheets.has(animation.asset)) continue;
+        loadedSheets.add(animation.asset);
+        this.load.spritesheet(spriteTextureKey(animation.asset), animation.asset, {
+          frameWidth: animation.frameWidth,
+          frameHeight: animation.frameHeight,
         });
       }
     }
@@ -470,28 +473,34 @@ export class ArenaScene extends Phaser.Scene {
 
   private prepareFighterSprite(f: Fighter) {
     const config = FIGHTER_SPRITES[f.stats.id];
-    const texture = spriteTextureKey(f.stats.id);
-    if (config.sheet && this.textures.exists(texture)) {
-      for (const [state, animation] of Object.entries(config.animations) as [
-        FighterAnimation,
-        (typeof config.animations)[FighterAnimation],
-      ][]) {
-        const key = spriteAnimationKey(f.stats.id, state);
-        if (!this.anims.exists(key)) {
-          this.anims.create({
-            key,
-            frames: this.anims.generateFrameNumbers(texture, {
-              start: animation.start,
-              end: animation.end,
-            }),
-            frameRate: animation.frameRate,
-            repeat: animation.repeat,
-          });
-        }
+    let firstTexture: string | null = null;
+    for (const [state, animation] of Object.entries(config.animations) as [
+      FighterAnimation,
+      (typeof config.animations)[FighterAnimation],
+    ][]) {
+      if (!animation) continue;
+      const texture = spriteTextureKey(animation.asset);
+      if (!this.textures.exists(texture)) continue;
+      firstTexture ??= texture;
+      const key = spriteAnimationKey(f.stats.id, state);
+      if (!this.anims.exists(key)) {
+        const start = animation.start ?? 0;
+        const end = animation.end ?? start + animation.frameCount - 1;
+        this.anims.create({
+          key,
+          frames: this.anims.generateFrameNumbers(texture, {
+            start,
+            end,
+          }),
+          frameRate: animation.frameRate,
+          repeat: animation.repeat,
+        });
       }
+    }
 
+    if (firstTexture) {
       const sprite = this.add
-        .sprite(f.x, f.y, texture)
+        .sprite(f.x, f.y, firstTexture)
         .setOrigin(0.5, 1)
         .setScale(config.displayScale);
       this.fighterSprites.set(f, sprite);
@@ -512,20 +521,49 @@ export class ArenaScene extends Phaser.Scene {
   private syncFighterSprite(f: Fighter) {
     const sprite = this.fighterSprites.get(f);
     if (!sprite) return false;
-    const animation: FighterAnimation = f.state === "attack" ? (f.attackKind ?? "idle") : f.state;
-    const key = spriteAnimationKey(f.stats.id, animation);
+    const config = FIGHTER_SPRITES[f.stats.id];
+    const requested: FighterAnimation = f.state === "attack" ? (f.attackKind ?? "idle") : f.state;
+    const visualAnimation = [requested, "idle" as const].find(
+      (candidate, index, candidates) =>
+        candidates.indexOf(candidate) === index &&
+        config.animations[candidate] !== undefined &&
+        this.anims.exists(spriteAnimationKey(f.stats.id, candidate)),
+    );
+    const animationDef = visualAnimation ? config.animations[visualAnimation] : undefined;
     const hurtFlash = f.flash > 0 && Math.floor(f.flash * 40) % 2 === 0;
-    let visualY = f.y;
-    if (!(sprite instanceof Phaser.GameObjects.Sprite)) {
-      visualY += IDLE_IMAGE_GROUND_OFFSET;
+
+    if (sprite instanceof Phaser.GameObjects.Sprite && visualAnimation && animationDef) {
+      const key = spriteAnimationKey(f.stats.id, visualAnimation);
+      const texture = spriteTextureKey(animationDef.asset);
+      if (sprite.texture.key !== texture) sprite.setTexture(texture);
+      if (sprite.anims.currentAnim?.key !== key || !sprite.anims.isPlaying) sprite.play(key, true);
+      sprite
+        .setVisible(true)
+        .setPosition(
+          f.x + (animationDef.offsetX ?? 0) * f.facing,
+          f.y + (animationDef.offsetY ?? 0),
+        )
+        .setScale(animationDef.scale ?? config.displayScale)
+        .setFlipX(f.facing === -1)
+        .setAlpha(hurtFlash ? 0.55 : 1);
+      return true;
+    }
+
+    const idleTexture = idleTextureKey(f.stats.id);
+    if (!config.idleImage || !this.textures.exists(idleTexture)) {
+      sprite.setVisible(false);
+      return false;
+    }
+
+    if (sprite instanceof Phaser.GameObjects.Sprite) {
+      sprite.stop().setTexture(idleTexture);
     }
     sprite
-      .setPosition(f.x, visualY)
+      .setVisible(true)
+      .setPosition(f.x, f.y + IDLE_IMAGE_GROUND_OFFSET)
+      .setScale(config.idleDisplayHeight / sprite.height)
       .setFlipX(f.facing === -1)
       .setAlpha(hurtFlash ? 0.55 : 1);
-    if (sprite instanceof Phaser.GameObjects.Sprite && sprite.anims.currentAnim?.key !== key) {
-      sprite.play(key, true);
-    }
     return true;
   }
 
