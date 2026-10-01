@@ -8,7 +8,7 @@ import {
   type PointerEvent,
 } from "react";
 import { FIGHTERS, FIGHTER_LIST, type FighterId } from "../game/config/fighters";
-import type { Difficulty } from "../game/config/combat";
+import { DEFAULT_MOVE_SPEED, type Difficulty } from "../game/config/combat";
 import { FIGHTER_SPRITES } from "../game/config/sprites";
 import { GameBus } from "../game/core/bus";
 import { LocalInput, type ActionKey } from "../game/core/input";
@@ -194,7 +194,7 @@ function FighterRoster({
             <span className="ac-fighter-description">{item.description}</span>
             <span className="ac-stats">
               <Stat label="VIDA" value={item.maxHp / 1.3} />
-              <Stat label="VELOCIDADE" value={item.speed / 2.65} />
+              <Stat label="VELOCIDADE" value={(item.moveSpeed ?? DEFAULT_MOVE_SPEED) / 2.65} />
               <Stat label="ATAQUE" value={item.attacks.heavy.damage * 5} />
             </span>
             <span className="ac-special">ESPECIAL // {item.specialName}</span>

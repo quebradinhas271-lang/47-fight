@@ -1,10 +1,5 @@
-import { COMBAT } from "../config/combat";
-import {
-  DEFAULT_JUMP_FORCE,
-  type AttackDef,
-  type AttackKind,
-  type FighterStats,
-} from "../config/fighters";
+import { COMBAT, DEFAULT_JUMP_FORCE, DEFAULT_MOVE_SPEED } from "../config/combat";
+import { type AttackDef, type AttackKind, type FighterStats } from "../config/fighters";
 import type { FighterState, InputState, Rect } from "./types";
 import { EMPTY_INPUT } from "./types";
 
@@ -218,7 +213,7 @@ export class Fighter {
         const dir = (input.right ? 1 : 0) - (input.left ? 1 : 0);
         const control = this.onGround ? 1 : COMBAT.AIR_CONTROL;
         if (dir !== 0) {
-          this.vx = dir * this.stats.speed * control;
+          this.vx = dir * (this.stats.moveSpeed ?? DEFAULT_MOVE_SPEED) * control;
           if (this.onGround) this.state = "walk";
         } else if (this.onGround) {
           this.vx -= this.vx * Math.min(1, COMBAT.GROUND_FRICTION * dt);
