@@ -5,9 +5,6 @@
 export type FighterId = "dictador" | "holofokiu";
 export type AttackKind = "light" | "heavy" | "special";
 
-/** Regra de movimentação aplicada quando o lutador não possui uma exceção explícita. */
-export const DEFAULT_JUMP_FORCE = 1050;
-
 export interface AttackDef {
   name: string;
   /** quadros (a 60 fps) de preparação / janela ativa / recuperação */
@@ -41,7 +38,8 @@ export interface FighterStats {
   cssColor: string;
   cssAccent: string;
   maxHp: number;
-  speed: number;
+  /** Exceção opcional à velocidade global (reservada para mecânicas especiais). */
+  moveSpeed?: number;
   /** Exceção opcional ao padrão global (reservada para mecânicas especiais). */
   jumpForce?: number;
   /** multiplicador de velocidade das animações de ataque */
@@ -63,7 +61,6 @@ export const FIGHTERS: Record<FighterId, FighterStats> = {
     cssColor: "#d71920",
     cssAccent: "#ffb52e",
     maxHp: 110,
-    speed: 225,
     attackSpeed: 1.05,
     maxEnergy: 100,
     description: "Pressão implacável, avanços explosivos e golpes cobertos por energia rubra.",
@@ -132,7 +129,6 @@ export const FIGHTERS: Record<FighterId, FighterStats> = {
     cssColor: "#e3262e",
     cssAccent: "#66a8ff",
     maxHp: 120,
-    speed: 195,
     attackSpeed: 0.94,
     maxEnergy: 100,
     description: "Defesa sólida e artes marciais precisas, amplificadas por energia azul.",

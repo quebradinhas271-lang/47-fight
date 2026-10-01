@@ -1,3 +1,7 @@
+/** Parâmetros fundamentais compartilhados de movimentação dos lutadores. */
+export const DEFAULT_MOVE_SPEED = 225;
+export const DEFAULT_JUMP_FORCE = 1050;
+
 /**
  * Parâmetros globais de combate e física.
  * Tudo aqui é configurável para facilitar o balanceamento.
@@ -33,7 +37,7 @@ export const COMBAT = {
   MAX_COMBO: 3,
   COMBO_DAMAGE_SCALING: 0.85,
 
-  AIR_CONTROL: 0.55,
+  AIR_CONTROL: 0.75,
   GROUND_FRICTION: 12,
   HURT_FRICTION: 4,
 } as const;
