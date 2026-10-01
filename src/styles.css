@@ -69,7 +69,12 @@
   --health: oklch(0.72 0.2 55);
   --energy: oklch(0.72 0.17 200);
 
-  --gradient-arena: linear-gradient(160deg, oklch(0.18 0.03 265) 0%, oklch(0.1 0.02 265) 60%, oklch(0.12 0.06 25) 130%);
+  --gradient-arena: linear-gradient(
+    160deg,
+    oklch(0.18 0.03 265) 0%,
+    oklch(0.1 0.02 265) 60%,
+    oklch(0.12 0.06 25) 130%
+  );
   --gradient-primary: linear-gradient(100deg, oklch(0.55 0.24 26), oklch(0.44 0.2 18));
   --gradient-accent: linear-gradient(100deg, oklch(0.62 0.2 253), oklch(0.5 0.18 262));
   --gradient-health: linear-gradient(90deg, oklch(0.78 0.2 85), oklch(0.62 0.24 32));
@@ -284,5 +289,572 @@
   }
   50% {
     opacity: 0.45;
+  }
+}
+
+/* 47-FIGHT — application shell */
+.ac-shell {
+  padding: 1.25rem clamp(1rem, 4vw, 4rem);
+  display: flex;
+  flex-direction: column;
+}
+.ac-grid {
+  position: absolute;
+  inset: 45% 0 0;
+  opacity: 0.16;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 52px 52px;
+  transform: perspective(500px) rotateX(58deg) scale(1.3);
+  transform-origin: bottom;
+}
+.ac-topbar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 54px;
+}
+.ac-logo {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  font-family: var(--font-display);
+  font-size: clamp(4.8rem, 13vw, 10rem);
+  line-height: 0.68;
+  letter-spacing: -0.05em;
+  transform: skewX(-7deg);
+  filter: drop-shadow(0 8px 28px oklch(0 0 0 / 0.7));
+}
+.ac-logo strong {
+  color: var(--primary);
+  text-shadow: 4px 0 0 var(--foreground);
+}
+.ac-logo span {
+  color: var(--foreground);
+  border-bottom: 0.08em solid var(--primary);
+}
+.ac-logo[data-compact="true"] {
+  font-size: 2rem;
+}
+.ac-logo[data-compact="true"] strong {
+  text-shadow: 1px 0 var(--foreground);
+}
+.ac-icon-btn {
+  color: var(--muted-foreground);
+  border: 1px solid var(--border);
+  background: oklch(0 0 0 / 0.25);
+  padding: 0.45rem 0.75rem;
+  font: 700 0.75rem var(--font-sans);
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  position: relative;
+}
+.ac-hero {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.6fr);
+  align-items: center;
+  flex: 1;
+  width: min(1180px, 100%);
+  margin: auto;
+  gap: clamp(2rem, 6vw, 7rem);
+}
+.ac-kicker {
+  color: var(--primary);
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  font-size: 0.78rem;
+}
+.ac-tagline {
+  margin-top: 2.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: var(--muted-foreground);
+  font-weight: 700;
+}
+.ac-menu {
+  display: grid;
+  gap: 0.8rem;
+}
+.ac-controls-hint {
+  margin-top: 1rem;
+  color: var(--muted-foreground);
+  font-size: 0.76rem;
+  line-height: 1.7;
+  letter-spacing: 0.04em;
+}
+.ac-controls-hint b {
+  color: var(--accent);
+  margin-right: 0.5rem;
+}
+.ac-setup {
+  position: relative;
+  z-index: 1;
+  width: min(1180px, 100%);
+  margin: auto;
+  padding: 2rem 0;
+}
+.ac-setup--narrow {
+  width: min(760px, 100%);
+}
+.ac-step-title {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+.ac-step-title > span {
+  font: 700 3.5rem/1 var(--font-display);
+  color: var(--primary);
+  border-right: 1px solid var(--border);
+  padding-right: 1.25rem;
+}
+.ac-step-title h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+.ac-step-title p {
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-size: 0.8rem;
+  margin-top: 0.4rem;
+}
+.ac-roster {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.ac-fighter-card {
+  --fighter: var(--accent);
+  position: relative;
+  min-height: 390px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  color: var(--foreground);
+  padding: 1.25rem;
+  background: linear-gradient(
+    160deg,
+    color-mix(in oklch, var(--fighter) 13%, var(--card)),
+    var(--card) 50%
+  );
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: var(--transition-snap);
+}
+.ac-fighter-card:hover,
+.ac-fighter-card[data-selected="true"] {
+  transform: translateY(-7px);
+  border-color: var(--fighter);
+  box-shadow: 0 14px 45px color-mix(in oklch, var(--fighter) 25%, transparent);
+}
+.ac-fighter-card[data-selected="true"]::after {
+  content: "SELECIONADO";
+  position: absolute;
+  right: -1px;
+  top: -1px;
+  padding: 0.3rem 0.7rem;
+  color: #fff;
+  background: var(--fighter);
+  font: 700 0.65rem var(--font-sans);
+  letter-spacing: 0.1em;
+}
+.ac-fighter-number {
+  color: var(--fighter-accent);
+  font-weight: 700;
+}
+.ac-fighter-silhouette {
+  position: absolute;
+  right: -0.02em;
+  top: 0.05em;
+  font: 700 15rem/0.8 var(--font-display);
+  color: color-mix(in oklch, var(--fighter) 24%, transparent);
+  filter: drop-shadow(-10px 0 0 color-mix(in oklch, var(--fighter) 10%, transparent));
+}
+.ac-fighter-name {
+  margin-top: 6rem;
+  font: 700 3.8rem/0.8 var(--font-display);
+  color: var(--fighter-accent);
+  z-index: 1;
+}
+.ac-fighter-epithet {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+}
+.ac-fighter-description {
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  margin-top: 0.7rem;
+  min-height: 3.2em;
+}
+.ac-stats {
+  display: grid;
+  width: 100%;
+  gap: 0.4rem;
+  margin-top: auto;
+}
+.ac-stat {
+  display: grid;
+  grid-template-columns: 75px 1fr;
+  align-items: center;
+  gap: 0.4rem;
+}
+.ac-stat small {
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+}
+.ac-stat i {
+  height: 4px;
+  background: oklch(0 0 0 / 0.5);
+}
+.ac-stat i b {
+  display: block;
+  height: 100%;
+  background: var(--fighter);
+}
+.ac-special {
+  margin-top: 1rem;
+  color: var(--fighter-accent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.ac-actions {
+  display: grid;
+  grid-template-columns: 180px minmax(260px, 360px);
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.ac-difficulties {
+  display: grid;
+  gap: 0.75rem;
+}
+.ac-difficulty {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  text-align: left;
+  padding: 1rem 1.2rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: var(--transition-snap);
+}
+.ac-difficulty b {
+  font: 600 1.65rem/1 var(--font-display);
+  text-transform: uppercase;
+}
+.ac-difficulty small {
+  grid-column: 2;
+  color: var(--muted-foreground);
+}
+.ac-difficulty:hover,
+.ac-difficulty[data-selected="true"] {
+  border-color: var(--primary);
+  transform: translateX(5px);
+  box-shadow: var(--glow-primary);
+}
+.ac-threat {
+  grid-row: span 2;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.ac-threat i {
+  width: 8px;
+  height: 25px;
+  transform: skewX(-12deg);
+  background: var(--muted);
+}
+.ac-threat i[data-on="true"] {
+  background: var(--primary);
+  box-shadow: 0 0 10px var(--primary);
+}
+.ac-versus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  margin: 1.6rem 0 0;
+  font: 700 2.5rem var(--font-display);
+}
+.ac-versus em {
+  color: var(--muted-foreground);
+  font-size: 1.3rem;
+}
+.ac-enemy {
+  color: var(--primary);
+}
+
+/* Arena, HUD and overlays */
+.ac-fight-screen {
+  background: #05060a;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  position: relative;
+}
+.ac-game,
+.ac-game canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  object-fit: contain;
+}
+.ac-hud {
+  position: absolute;
+  z-index: 3;
+  top: max(1rem, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1060px, calc(100% - 7rem));
+  display: grid;
+  grid-template-columns: 1fr 100px 1fr;
+  gap: 1rem;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 4px #000);
+}
+.ac-hud-fighter {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-content: start;
+}
+.ac-hud-fighter[data-side="right"] {
+  direction: rtl;
+}
+.ac-hud-name {
+  display: flex;
+  gap: 0.7rem;
+  align-items: baseline;
+  grid-column: 1 / -1;
+  direction: ltr;
+}
+.ac-hud-fighter[data-side="right"] .ac-hud-name {
+  justify-content: flex-end;
+}
+.ac-hud-name b {
+  font: 700 1.8rem var(--font-display);
+}
+.ac-hud-name span {
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  color: var(--muted-foreground);
+}
+.ac-hud .ac-bar {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+.ac-hud .ac-bar--energy {
+  height: 0.38rem;
+  margin-top: 0.22rem;
+}
+.ac-hud-fighter > small {
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.65rem;
+  margin-top: 0.2rem;
+}
+.ac-timer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.ac-timer span {
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+}
+.ac-timer b {
+  font: 700 3.5rem/0.8 var(--font-display);
+  color: #fff;
+}
+.ac-pause-button {
+  position: absolute;
+  z-index: 4;
+  right: 1rem;
+  top: 1rem;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--steel);
+  background: oklch(0 0 0 / 0.5);
+  color: #fff;
+  cursor: pointer;
+}
+.ac-overlay {
+  position: absolute;
+  z-index: 10;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: oklch(0 0 0 / 0.72);
+  backdrop-filter: blur(7px);
+}
+.ac-modal {
+  width: min(390px, 100%);
+  text-align: center;
+  padding: 2rem;
+  background: color-mix(in oklch, var(--card) 94%, transparent);
+  border: 1px solid var(--primary);
+  box-shadow: var(--shadow-panel), var(--glow-primary);
+}
+.ac-modal h2 {
+  font-size: 4.5rem;
+  line-height: 1;
+  margin: 0.5rem;
+}
+.ac-modal p,
+.ac-modal small {
+  color: var(--muted-foreground);
+}
+.ac-modal .ac-btn {
+  margin-top: 0.7rem;
+}
+.ac-modal small {
+  display: block;
+  margin-top: 1rem;
+}
+.ac-touch-controls {
+  position: absolute;
+  z-index: 5;
+  inset: auto 1rem max(1rem, env(safe-area-inset-bottom));
+  display: none;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.ac-dpad,
+.ac-attacks {
+  display: flex;
+  align-items: end;
+  gap: 0.5rem;
+  pointer-events: auto;
+}
+.ac-touch-btn {
+  width: 58px;
+  height: 58px;
+  border: 1px solid #ffffff60;
+  background: #10131dcc;
+}
+.ac-touch-small {
+  width: 48px;
+  height: 48px;
+  font-size: 0.8rem;
+}
+.ac-touch-special {
+  border-color: var(--primary);
+  background: #6f1018cc;
+}
+
+@media (pointer: coarse), (max-width: 800px) {
+  .ac-touch-controls {
+    display: flex;
+  }
+  .ac-hero {
+    grid-template-columns: 1fr;
+    align-content: center;
+  }
+  .ac-hero-copy {
+    text-align: center;
+  }
+  .ac-hero-copy .ac-logo {
+    margin-inline: auto;
+  }
+  .ac-tagline {
+    margin-top: 1.5rem;
+  }
+  .ac-roster {
+    grid-template-columns: 1fr;
+    max-height: 57dvh;
+    overflow-y: auto;
+    padding: 0.5rem;
+  }
+  .ac-fighter-card {
+    min-height: 280px;
+  }
+  .ac-fighter-name {
+    margin-top: 2rem;
+  }
+  .ac-actions {
+    grid-template-columns: 1fr 1.8fr;
+  }
+  .ac-hud {
+    width: calc(100% - 4.5rem);
+    grid-template-columns: 1fr 55px 1fr;
+    gap: 0.35rem;
+  }
+  .ac-hud-name b {
+    font-size: 1.2rem;
+  }
+  .ac-hud-name span,
+  .ac-hud-fighter > small {
+    display: none;
+  }
+  .ac-timer b {
+    font-size: 2.3rem;
+  }
+  .ac-pause-button {
+    width: 36px;
+    height: 36px;
+    right: 0.35rem;
+    top: 0.6rem;
+  }
+}
+
+@media (max-width: 540px) {
+  .ac-shell {
+    padding: 0.8rem;
+  }
+  .ac-topbar > .ac-logo[data-compact="true"] {
+    font-size: 1.55rem;
+  }
+  .ac-step-title {
+    margin-bottom: 0.8rem;
+  }
+  .ac-step-title > span {
+    font-size: 2.2rem;
+  }
+  .ac-step-title h1 {
+    font-size: 1.8rem;
+  }
+  .ac-difficulty {
+    grid-template-columns: 75px 1fr;
+    padding: 0.75rem;
+  }
+  .ac-versus {
+    margin-top: 0.8rem;
+  }
+  .ac-actions {
+    margin-top: 0.8rem;
+  }
+  .ac-actions .ac-btn {
+    font-size: 1.05rem;
+    padding: 0.65rem;
+  }
+  .ac-touch-btn {
+    width: 50px;
+    height: 50px;
+  }
+  .ac-touch-small {
+    width: 42px;
+    height: 42px;
+  }
+  .ac-touch-controls {
+    inset-inline: 0.5rem;
+  }
+  .ac-dpad,
+  .ac-attacks {
+    gap: 0.25rem;
   }
 }

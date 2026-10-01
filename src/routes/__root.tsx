@@ -77,16 +77,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "ARENA CLASH" },
+      { title: "47-FIGHT | Combate arcade" },
       {
         name: "description",
-        content: "Jogo de luta 2D arcade com combate em tempo real contra IA.",
+        content: "47-FIGHT, jogo de luta 2D arcade com combate em tempo real contra IA.",
       },
-      { name: "author", content: "Arena Clash" },
-      { property: "og:title", content: "ARENA CLASH" },
+      { name: "author", content: "47-FIGHT" },
+      { property: "og:title", content: "47-FIGHT" },
       {
         property: "og:description",
-        content: "Jogo de luta 2D arcade com combate em tempo real contra IA.",
+        content: "47-FIGHT, jogo de luta 2D arcade com combate em tempo real contra IA.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -114,7 +114,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
       </head>
