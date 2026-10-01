@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import type { ArenaId } from "../config/arenas";
 import { COMBAT, type Difficulty } from "../config/combat";
 import { FIGHTERS, type FighterId } from "../config/fighters";
 import {
@@ -23,6 +24,7 @@ import {
 export interface ArenaSceneData {
   p1: FighterId;
   p2: FighterId;
+  arena: ArenaId;
   difficulty: Difficulty;
   mode: "ai" | "online";
   bus: GameBus;
@@ -349,41 +351,28 @@ export class ArenaScene extends Phaser.Scene {
     const W = COMBAT.ARENA_WIDTH;
     const H = COMBAT.ARENA_HEIGHT;
     g.clear();
-    g.fillStyle(0x07080c, 1).fillRect(0, 0, W, H);
+    const arena = this.sceneData.arena;
+    const sky =
+      arena === "coliseum" ? 0x32170e : arena === "barra_lighthouse" ? 0x08253a : 0x07080c;
+    const ground =
+      arena === "coliseum" ? 0x493223 : arena === "barra_lighthouse" ? 0x172d38 : 0x1a1f2b;
+    const accent =
+      arena === "coliseum" ? 0xffad42 : arena === "barra_lighthouse" ? 0x45c9ff : 0xff2f3c;
+    g.fillStyle(sky, 1).fillRect(0, 0, W, H);
     for (let i = 0; i < 16; i++) {
       const a = 0.05 + i * 0.004;
       g.fillStyle(0x12161f, a).fillRect(0, (H / 16) * i, W, H / 16);
     }
     // halo vermelho atrás da arena
     for (let r = 420; r > 0; r -= 30) {
-      g.fillStyle(0xff2f3c, 0.012).fillCircle(W / 2, 430, r);
+      g.fillStyle(accent, 0.012).fillCircle(W / 2, 430, r);
     }
-    // estruturas ao fundo
-    const towers = [90, 230, 400, 620, 820, 1010, 1160];
-    towers.forEach((x, i) => {
-      const w = 70 + ((i * 37) % 60);
-      const h = 180 + ((i * 91) % 220);
-      g.fillStyle(0x121722, 1).fillRect(x - w / 2, 430 - h, w, h);
-      for (let wy = 0; wy < h - 20; wy += 26) {
-        for (let wx = 6; wx < w - 12; wx += 20) {
-          const lit = (i * 7 + wy + wx) % 5 < 2;
-          g.fillStyle(lit ? 0x2f82ff : 0x1b2130, lit ? 0.55 : 1).fillRect(
-            x - w / 2 + wx,
-            430 - h + wy + 10,
-            9,
-            12,
-          );
-        }
-      }
-    });
-    // refletores
-    for (const x of [200, 640, 1080]) {
-      g.fillStyle(0x2f82ff, 0.06);
-      g.fillTriangle(x, 60, x - 170, COMBAT.GROUND_Y, x + 170, COMBAT.GROUND_Y);
-    }
+    if (arena === "military_base") this.drawMilitaryBase(g);
+    else if (arena === "coliseum") this.drawColiseum(g);
+    else this.drawBarraLighthouse(g);
     // plataforma / ringue
-    g.fillStyle(0x1a1f2b, 1).fillRect(0, COMBAT.GROUND_Y, W, H - COMBAT.GROUND_Y);
-    g.fillStyle(0xff2f3c, 0.85).fillRect(0, COMBAT.GROUND_Y, W, 5);
+    g.fillStyle(ground, 1).fillRect(0, COMBAT.GROUND_Y, W, H - COMBAT.GROUND_Y);
+    g.fillStyle(accent, 0.85).fillRect(0, COMBAT.GROUND_Y, W, 5);
     g.fillStyle(0x2f82ff, 0.25).fillRect(0, COMBAT.GROUND_Y + 5, W, 2);
     g.fillStyle(0x0d1118, 1).fillRect(0, COMBAT.GROUND_Y + 46, W, 6);
     for (let x = 0; x < W; x += 80) {
@@ -392,6 +381,46 @@ export class ArenaScene extends Phaser.Scene {
     // laterais da arena
     g.fillStyle(0x0a0d14, 0.9).fillRect(0, 0, COMBAT.WALL_MARGIN - 28, H);
     g.fillStyle(0x0a0d14, 0.9).fillRect(W - COMBAT.WALL_MARGIN + 28, 0, COMBAT.WALL_MARGIN, H);
+  }
+
+  private drawMilitaryBase(g: Phaser.GameObjects.Graphics) {
+    [90, 230, 400, 620, 820, 1010, 1160].forEach((x, i) => {
+      const w = 70 + ((i * 37) % 60);
+      const h = 180 + ((i * 91) % 220);
+      g.fillStyle(0x121722, 1).fillRect(x - w / 2, 430 - h, w, h);
+      g.fillStyle(0x2f82ff, 0.45).fillRect(x - w / 2 + 10, 430 - h + 18, w - 20, 8);
+    });
+    for (const x of [200, 640, 1080])
+      g.fillStyle(0x2f82ff, 0.06).fillTriangle(
+        x,
+        60,
+        x - 170,
+        COMBAT.GROUND_Y,
+        x + 170,
+        COMBAT.GROUND_Y,
+      );
+  }
+
+  private drawColiseum(g: Phaser.GameObjects.Graphics) {
+    g.fillStyle(0xd17932, 0.18).fillCircle(1040, 120, 90);
+    g.fillStyle(0x6e4630, 1).fillRect(80, 150, 1120, 300);
+    for (let x = 105; x < 1180; x += 105) {
+      g.fillStyle(0x1c1110, 1).fillRoundedRect(x, 230, 62, 145, 30);
+      g.fillStyle(0xb77a4e, 1).fillRect(x - 10, 210, 82, 18);
+    }
+    g.fillStyle(0xffc06a, 0.14).fillRect(0, 390, 1280, 60);
+  }
+
+  private drawBarraLighthouse(g: Phaser.GameObjects.Graphics) {
+    g.fillStyle(0xffbf69, 0.32).fillCircle(1060, 125, 78);
+    g.fillStyle(0x0c5570, 1).fillRect(0, 350, 1280, 100);
+    for (let x = 0; x < 1280; x += 130)
+      g.lineStyle(5, 0x63c7df, 0.4)
+        .arc(x, 370, 80, Math.PI, Math.PI * 2)
+        .strokePath();
+    g.fillStyle(0xe4ded1, 1).fillTriangle(160, 410, 245, 410, 218, 90);
+    g.fillStyle(0xba342d, 1).fillRect(195, 130, 38, 55);
+    g.fillStyle(0xefe1ae, 0.16).fillTriangle(215, 140, 720, 40, 720, 250);
   }
 
   private render(dt: number) {

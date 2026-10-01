@@ -9,6 +9,7 @@ import {
 } from "react";
 import { FIGHTERS, FIGHTER_LIST, type FighterId } from "../game/config/fighters";
 import { DEFAULT_MOVE_SPEED, type Difficulty } from "../game/config/combat";
+import { ARENAS, ARENA_LIST, type ArenaId } from "../game/config/arenas";
 import { FIGHTER_SPRITES } from "../game/config/sprites";
 import { GameBus } from "../game/core/bus";
 import { LocalInput, type ActionKey } from "../game/core/input";
@@ -17,12 +18,13 @@ import { sfx } from "../game/audio";
 
 export const Route = createFileRoute("/")({ component: FightApp });
 
-type Screen = "menu" | "fighter" | "opponent" | "fight";
+type Screen = "menu" | "fighter" | "opponent" | "arena" | "fight";
 
 function FightApp() {
   const [screen, setScreen] = useState<Screen>("menu");
   const [fighter, setFighter] = useState<FighterId>("dictador");
   const [opponent, setOpponent] = useState<FighterId>("holofokiu");
+  const [arena, setArena] = useState<ArenaId | null>(null);
   const difficulty: Difficulty = "normal";
   const [sound, setSound] = useState(true);
 
@@ -36,6 +38,7 @@ function FightApp() {
       <FightScreen
         fighter={fighter}
         opponent={opponent}
+        arena={arena!}
         difficulty={difficulty}
         sound={sound}
         onMenu={() => navigate("menu", true)}
@@ -123,8 +126,55 @@ function FightApp() {
             >
               ‹ Voltar
             </button>
-            <button className="ac-btn" data-variant="solid" onClick={() => navigate("fight")}>
+            <button className="ac-btn" data-variant="solid" onClick={() => navigate("arena")}>
               Confirmar {FIGHTERS[opponent].name} ›
+            </button>
+          </div>
+        </section>
+      )}
+
+      {screen === "arena" && (
+        <section className="ac-setup ac-fade-in">
+          <StepTitle
+            step="03"
+            title="Escolha sua arena"
+            subtitle="Defina o palco do próximo confronto"
+          />
+          <div className="ac-arena-list">
+            {ARENA_LIST.map((item, index) => (
+              <button
+                key={item.id}
+                className="ac-arena-card"
+                data-selected={arena === item.id}
+                onClick={() => {
+                  setArena(item.id);
+                  sfx.play("click");
+                }}
+              >
+                <img src={item.image} alt={`Prévia da arena ${item.name}`} />
+                <span className="ac-arena-copy">
+                  <small>{String(index + 1).padStart(2, "0")} // ARENA</small>
+                  <b>{item.name}</b>
+                  <span>{item.description}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+          <div className="ac-actions">
+            <button
+              className="ac-btn"
+              data-variant="ghost"
+              onClick={() => navigate("opponent", true)}
+            >
+              ‹ Voltar
+            </button>
+            <button
+              className="ac-btn"
+              data-variant="solid"
+              disabled={!arena}
+              onClick={() => arena && navigate("fight")}
+            >
+              {arena ? `Lutar em ${ARENAS[arena].name} ›` : "Selecione uma arena"}
             </button>
           </div>
         </section>
@@ -220,12 +270,14 @@ function FighterPortrait({ fighter, name }: { fighter: FighterId; name: string }
 function FightScreen({
   fighter,
   opponent,
+  arena,
   difficulty,
   sound,
   onMenu,
 }: {
   fighter: FighterId;
   opponent: FighterId;
+  arena: ArenaId;
   difficulty: Difficulty;
   sound: boolean;
   onMenu: () => void;
@@ -257,6 +309,7 @@ function FightScreen({
       const game = createGame(host.current, {
         p1: fighter,
         p2: opponent,
+        arena,
         difficulty,
         mode: "ai",
         bus,
@@ -274,7 +327,7 @@ function FightScreen({
       gameRef.current = null;
       sceneRef.current = null;
     };
-  }, [difficulty, fighter, opponent, sound]);
+  }, [arena, difficulty, fighter, opponent, sound]);
 
   const togglePause = useCallback(() => {
     if (snapshot?.over) return;
