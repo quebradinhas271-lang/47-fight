@@ -6,7 +6,7 @@ export type FighterId = "dictador" | "holofokiu";
 export type AttackKind = "light" | "heavy" | "special";
 
 /** Regra de movimentação aplicada quando o lutador não possui uma exceção explícita. */
-export const DEFAULT_JUMP_FORCE = 1000;
+export const DEFAULT_JUMP_FORCE = 1050;
 
 export interface AttackDef {
   name: string;
