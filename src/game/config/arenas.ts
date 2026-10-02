@@ -4,6 +4,7 @@ export const ARENAS = {
     name: "Base Militar",
     image: "/assets/arenas/base-militar.png",
     fallbackImage: "/assets/arenas/base-militar.svg",
+    selectionImage: "/assets/ui/arena-selection/base-militar-1.png",
     description: "Um complexo fortificado sob refletores de alta potência.",
   },
   coliseum: {
@@ -11,6 +12,7 @@ export const ARENAS = {
     name: "Coliseu",
     image: "/assets/arenas/coliseu.png",
     fallbackImage: "/assets/arenas/coliseu.svg",
+    selectionImage: "/assets/ui/arena-selection/coliseu-1.png",
     description: "Pedra, areia e uma multidão pronta para o espetáculo.",
   },
   barra_lighthouse: {
@@ -18,6 +20,7 @@ export const ARENAS = {
     name: "Farol da Barra",
     image: "/assets/arenas/farol-da-barra.png",
     fallbackImage: "/assets/arenas/farol-da-barra.svg",
+    selectionImage: "/assets/ui/arena-selection/farol-da-barra-1.png",
     description: "O combate encontra o mar sob a luz do histórico farol.",
   },
 } as const;
