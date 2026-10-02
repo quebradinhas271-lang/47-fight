@@ -16,6 +16,8 @@ import { LocalInput, type ActionKey } from "../game/core/input";
 import type { MatchSnapshot } from "../game/core/types";
 import { sfx } from "../game/audio";
 import { CinematicIntro } from "../components/CinematicIntro";
+import { GameLogo } from "../components/GameLogo";
+import { MapPin, Swords } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -74,7 +76,9 @@ function FightApp() {
     <main className={`ac-screen ac-shell ${screen === "arena" ? "ac-shell--arena" : ""}`}>
       <div className="ac-grid" aria-hidden="true" />
       <header className="ac-topbar">
-        <Logo compact={screen !== "menu"} />
+        <GameLogo
+          variant={screen === "menu" ? "header" : screen === "arena" ? "arena" : "header"}
+        />
         <button
           className="ac-icon-btn"
           onClick={() => {
@@ -93,7 +97,7 @@ function FightApp() {
         <section className="ac-hero ac-fade-in">
           <div className="ac-hero-copy">
             <p className="ac-kicker">PROTOCOLO DE COMBATE // 2047</p>
-            <Logo />
+            <GameLogo variant="hero" />
             <p className="ac-tagline">Entre na arena. Domine o combate.</p>
           </div>
           <div className="ac-menu ac-rise">
@@ -182,11 +186,13 @@ function FightApp() {
                   key={item.id}
                   className="ac-arena-card"
                   data-selected={arena === item.id}
+                  aria-pressed={arena === item.id}
                   onClick={() => {
                     setArena(item.id);
                     sfx.play("click");
                   }}
                 >
+                  <img src={item.selectionImage} alt="" />
                   <span className="ac-arena-copy">
                     <small>{String(index + 1).padStart(2, "0")} // ARENA</small>
                     <b>{item.name}</b>
@@ -195,13 +201,16 @@ function FightApp() {
               ))}
             </div>
             <div className="ac-arena-details" aria-live="polite">
-              <small>{arena ? "ARENA SELECIONADA" : "AGUARDANDO SELEÇÃO"}</small>
-              <h2>{arena ? ARENAS[arena].name : "Selecione um cenário"}</h2>
-              <p>
-                {arena
-                  ? ARENAS[arena].description
-                  : "Destaque uma das arenas acima para visualizar o campo de batalha."}
-              </p>
+              <MapPin aria-hidden="true" />
+              <div>
+                <small>{arena ? "ARENA SELECIONADA" : "AGUARDANDO SELEÇÃO"}</small>
+                <h2>{arena ? ARENAS[arena].name : "Selecione um cenário"}</h2>
+                <p>
+                  {arena
+                    ? ARENAS[arena].description
+                    : "Destaque uma das arenas acima para visualizar o campo de batalha."}
+                </p>
+              </div>
             </div>
             <div className="ac-arena-actions">
               <button
@@ -210,7 +219,7 @@ function FightApp() {
                 disabled={!arena}
                 onClick={() => arena && navigate("fight")}
               >
-                Confirmar <span>›</span>
+                <Swords aria-hidden="true" /> Confirmar <span>›</span>
               </button>
               <button
                 className="ac-btn"
@@ -224,15 +233,6 @@ function FightApp() {
         </section>
       )}
     </main>
-  );
-}
-
-function Logo({ compact = false }: { compact?: boolean }) {
-  return (
-    <div className="ac-logo" data-compact={compact}>
-      <strong>47</strong>
-      <span>FIGHT</span>
-    </div>
   );
 }
 
@@ -416,6 +416,7 @@ function FightScreen({
       {paused && !snapshot?.over && (
         <div className="ac-overlay">
           <div className="ac-modal ac-rise">
+            <GameLogo variant="modal" />
             <span className="ac-kicker">COMBATE INTERROMPIDO</span>
             <h2>PAUSA</h2>
             <button className="ac-btn" data-variant="solid" onClick={togglePause}>
@@ -431,6 +432,7 @@ function FightScreen({
       {snapshot?.over && (
         <div className="ac-overlay">
           <div className="ac-modal ac-rise">
+            <GameLogo variant="modal" />
             <span className="ac-kicker">RESULTADO DA PARTIDA</span>
             <h2>
               {snapshot.winner === "draw"
