@@ -5,8 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * ARENA CLASH — sistema de design
- * Paleta: preto / grafite / vermelho sangue / azul elétrico.
+ * 47-FIGHT — sistema de identidade visual oficial.
+ * Paleta: preto profundo / vermelho / escarlate / dourado / branco quente.
  * Todos os valores são tokens semânticos; componentes nunca usam cores cruas.
  */
 
@@ -45,27 +45,32 @@
 
 :root {
   --radius: 0.35rem;
-  --background: oklch(0.14 0.015 265);
-  --foreground: oklch(0.96 0.005 250);
-  --card: oklch(0.19 0.018 263);
-  --card-foreground: oklch(0.96 0.005 250);
-  --popover: oklch(0.17 0.018 263);
-  --popover-foreground: oklch(0.96 0.005 250);
-  --primary: oklch(0.58 0.235 26);
-  --primary-foreground: oklch(0.98 0.01 90);
-  --secondary: oklch(0.26 0.02 262);
-  --secondary-foreground: oklch(0.94 0.005 250);
-  --muted: oklch(0.24 0.018 262);
-  --muted-foreground: oklch(0.68 0.02 258);
-  --accent: oklch(0.66 0.2 253);
-  --accent-foreground: oklch(0.14 0.015 265);
-  --destructive: oklch(0.6 0.24 27);
-  --destructive-foreground: oklch(0.98 0.01 90);
-  --border: oklch(0.3 0.02 262);
-  --input: oklch(0.28 0.02 262);
-  --ring: oklch(0.66 0.2 253);
-  --graphite: oklch(0.22 0.018 262);
-  --steel: oklch(0.34 0.02 260);
+  --brand-black: #080809;
+  --brand-red: #bd101b;
+  --brand-scarlet: #f04a20;
+  --brand-gold: #e9a044;
+  --brand-white: #f1e8dd;
+  --background: var(--brand-black);
+  --foreground: var(--brand-white);
+  --card: #181719;
+  --card-foreground: var(--brand-white);
+  --popover: #141315;
+  --popover-foreground: var(--brand-white);
+  --primary: var(--brand-red);
+  --primary-foreground: var(--brand-white);
+  --secondary: #2a2728;
+  --secondary-foreground: var(--brand-white);
+  --muted: #302c2d;
+  --muted-foreground: #c4b9ae;
+  --accent: var(--brand-gold);
+  --accent-foreground: var(--brand-black);
+  --destructive: var(--brand-red);
+  --destructive-foreground: var(--brand-white);
+  --border: #5a4945;
+  --input: #352e2e;
+  --ring: var(--brand-scarlet);
+  --graphite: #211e1f;
+  --steel: #71625c;
   --health: oklch(0.72 0.2 55);
   --energy: oklch(0.72 0.17 200);
 
@@ -75,12 +80,16 @@
     oklch(0.1 0.02 265) 60%,
     oklch(0.12 0.06 25) 130%
   );
-  --gradient-primary: linear-gradient(100deg, oklch(0.55 0.24 26), oklch(0.44 0.2 18));
-  --gradient-accent: linear-gradient(100deg, oklch(0.62 0.2 253), oklch(0.5 0.18 262));
+  --gradient-primary: linear-gradient(105deg, var(--brand-red), var(--brand-scarlet));
+  --gradient-accent: linear-gradient(105deg, var(--brand-scarlet), var(--brand-gold));
   --gradient-health: linear-gradient(90deg, oklch(0.78 0.2 85), oklch(0.62 0.24 32));
   --gradient-energy: linear-gradient(90deg, oklch(0.78 0.16 200), oklch(0.6 0.2 255));
-  --glow-primary: 0 0 0 1px oklch(0.58 0.235 26 / 0.5), 0 0 28px oklch(0.58 0.235 26 / 0.35);
-  --glow-accent: 0 0 0 1px oklch(0.66 0.2 253 / 0.5), 0 0 28px oklch(0.66 0.2 253 / 0.35);
+  --glow-primary:
+    0 0 0 1px color-mix(in srgb, var(--brand-scarlet) 55%, transparent),
+    0 0 28px color-mix(in srgb, var(--brand-red) 38%, transparent);
+  --glow-accent:
+    0 0 0 1px color-mix(in srgb, var(--brand-gold) 50%, transparent),
+    0 0 28px color-mix(in srgb, var(--brand-gold) 28%, transparent);
   --shadow-panel: 0 24px 60px oklch(0 0 0 / 0.6);
   --transition-snap: 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -317,30 +326,31 @@
   justify-content: space-between;
   min-height: 54px;
 }
-.ac-logo {
-  display: flex;
-  align-items: center;
-  width: fit-content;
-  font-family: var(--font-display);
-  font-size: clamp(4.8rem, 13vw, 10rem);
-  line-height: 0.68;
-  letter-spacing: -0.05em;
-  transform: skewX(-7deg);
-  filter: drop-shadow(0 8px 28px oklch(0 0 0 / 0.7));
+.game-logo {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 28px rgb(0 0 0 / 70%));
+  user-select: none;
 }
-.ac-logo strong {
-  color: var(--primary);
-  text-shadow: 4px 0 0 var(--foreground);
+.game-logo--header {
+  width: clamp(88px, 10vw, 145px);
+  max-height: 58px;
 }
-.ac-logo span {
-  color: var(--foreground);
-  border-bottom: 0.08em solid var(--primary);
+.game-logo--hero {
+  width: clamp(280px, 48vw, 650px);
+  max-height: 310px;
 }
-.ac-logo[data-compact="true"] {
-  font-size: 2rem;
+.game-logo--arena {
+  width: clamp(150px, 18vw, 260px);
+  max-height: 82px;
 }
-.ac-logo[data-compact="true"] strong {
-  text-shadow: 1px 0 var(--foreground);
+.game-logo--modal {
+  width: min(180px, 62%);
+  max-height: 86px;
+  margin: 0 auto 0.8rem;
 }
 .ac-icon-btn {
   color: var(--muted-foreground);
@@ -820,7 +830,7 @@
   .ac-hero-copy {
     text-align: center;
   }
-  .ac-hero-copy .ac-logo {
+  .ac-hero-copy .game-logo {
     margin-inline: auto;
   }
   .ac-tagline {
@@ -869,8 +879,8 @@
   .ac-shell {
     padding: 0.8rem;
   }
-  .ac-topbar > .ac-logo[data-compact="true"] {
-    font-size: 1.55rem;
+  .ac-topbar > .game-logo--header {
+    width: 82px;
   }
   .ac-step-title {
     margin-bottom: 0.8rem;
@@ -921,7 +931,7 @@
 
 /* Arena selection — clean scenery stays behind the interactive React interface. */
 .ac-shell--arena {
-  background: #08090d;
+  background: var(--brand-black);
 }
 .ac-shell--arena .ac-grid {
   display: none;
@@ -961,8 +971,14 @@
 }
 .ac-arena-shade {
   background:
-    linear-gradient(90deg, #050609f7 0%, #07090de8 34%, #07090d80 58%, #0506091f 82%),
-    linear-gradient(0deg, #050609a8 0%, transparent 36%);
+    linear-gradient(
+      90deg,
+      rgb(8 8 9 / 98%) 0%,
+      rgb(8 8 9 / 90%) 32%,
+      rgb(8 8 9 / 46%) 57%,
+      rgb(8 8 9 / 7%) 84%
+    ),
+    linear-gradient(0deg, rgb(8 8 9 / 68%) 0%, transparent 36%);
   pointer-events: none;
 }
 .ac-arena-interface {
@@ -972,9 +988,11 @@
 }
 .ac-arena-title {
   margin-bottom: clamp(1rem, 2.5vh, 1.8rem);
+  padding-left: 1rem;
+  border-left: 4px solid var(--brand-scarlet);
 }
 .ac-arena-title > span,
-.ac-arena-details > small {
+.ac-arena-details small {
   color: var(--primary);
   font-size: 0.7rem;
   font-weight: 700;
@@ -986,6 +1004,9 @@
   line-height: 0.82;
   text-transform: uppercase;
   text-shadow: 0 5px 24px #000;
+  background: var(--gradient-accent);
+  background-clip: text;
+  color: transparent;
 }
 .ac-arena-title p {
   margin-top: 0.7rem;
@@ -1002,24 +1023,40 @@
 }
 .ac-arena-card {
   position: relative;
-  min-height: 96px;
+  min-height: 154px;
   padding: 0;
   overflow: hidden;
   color: var(--foreground);
   text-align: left;
-  background: #12151ddd;
-  border: 1px solid #6f737e80;
-  border-bottom: 3px solid #6f737e;
+  background: color-mix(in srgb, var(--graphite) 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brand-white) 35%, transparent);
+  border-bottom: 3px solid var(--steel);
+  clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%);
   cursor: pointer;
   transition: var(--transition-snap);
 }
 .ac-arena-card:hover,
+.ac-arena-card:focus-visible,
 .ac-arena-card[data-selected="true"] {
   transform: translateY(-4px);
   border-color: var(--primary);
-  background: #1a1519ee;
+  background: color-mix(in srgb, var(--brand-red) 20%, var(--graphite));
   box-shadow: 0 0 24px color-mix(in oklch, var(--primary) 38%, transparent);
   outline: none;
+}
+.ac-arena-card > img {
+  display: block;
+  width: 100%;
+  height: 108px;
+  object-fit: cover;
+  transition:
+    transform var(--transition-snap),
+    filter var(--transition-snap);
+}
+.ac-arena-card:hover > img,
+.ac-arena-card[data-selected="true"] > img {
+  transform: scale(1.04);
+  filter: saturate(1.08) contrast(1.04);
 }
 .ac-arena-card[data-selected="true"]::after {
   content: "";
@@ -1031,7 +1068,8 @@
 .ac-arena-copy {
   display: grid;
   gap: 0.4rem;
-  padding: 1rem 0.85rem;
+  padding: 0.65rem 0.9rem 0.75rem;
+  background: color-mix(in srgb, var(--graphite) 90%, transparent);
 }
 .ac-arena-copy small {
   color: var(--primary);
@@ -1043,10 +1081,23 @@
   text-transform: uppercase;
 }
 .ac-arena-details {
-  min-height: 104px;
+  min-height: 112px;
   margin-top: clamp(1rem, 2.6vh, 1.7rem);
-  padding-left: 1rem;
-  border-left: 2px solid var(--primary);
+  padding: 0.9rem 1.1rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.8rem;
+  align-items: start;
+  background: color-mix(in srgb, var(--graphite) 84%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brand-gold) 45%, transparent);
+  border-left: 4px solid var(--brand-scarlet);
+  clip-path: polygon(2% 0, 100% 0, 98% 100%, 0 100%);
+  backdrop-filter: blur(8px);
+}
+.ac-arena-details > svg {
+  width: 20px;
+  margin-top: 0.2rem;
+  color: var(--brand-gold);
 }
 .ac-arena-details h2 {
   margin-top: 0.15rem;
@@ -1059,10 +1110,22 @@
   line-height: 1.35;
 }
 .ac-arena-actions {
-  display: grid;
-  grid-template-columns: minmax(220px, 1fr) 150px;
+  display: flex;
+  flex-direction: column;
+  width: min(370px, 100%);
   gap: 0.7rem;
   margin-top: clamp(0.8rem, 2vh, 1.3rem);
+}
+.ac-arena-actions .ac-btn {
+  clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+}
+.ac-arena-actions .ac-btn[data-variant="solid"] {
+  min-height: 58px;
+  border: 1px solid var(--brand-scarlet);
+  box-shadow: var(--glow-primary);
+}
+.ac-arena-actions .ac-btn svg {
+  width: 1.15em;
 }
 .ac-arena-actions .ac-btn[data-variant="ghost"] {
   justify-content: center;
@@ -1088,7 +1151,10 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .ac-arena-card {
-    min-height: 76px;
+    min-height: 110px;
+  }
+  .ac-arena-card > img {
+    height: 70px;
   }
   .ac-arena-copy {
     padding: 0.7rem 0.55rem;
@@ -1109,7 +1175,8 @@
     font-size: 0.8rem;
   }
   .ac-arena-actions {
-    grid-template-columns: 1.6fr 1fr;
+    width: 100%;
+    flex-direction: row-reverse;
   }
   .ac-arena-actions .ac-btn {
     min-height: 44px;
@@ -1133,7 +1200,10 @@
     margin-top: 0.3rem;
   }
   .ac-arena-card {
-    min-height: 70px;
+    min-height: 96px;
+  }
+  .ac-arena-card > img {
+    height: 56px;
   }
   .ac-arena-copy {
     padding: 0.55rem 0.7rem;
