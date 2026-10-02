@@ -15,12 +15,32 @@ import { GameBus } from "../game/core/bus";
 import { LocalInput, type ActionKey } from "../game/core/input";
 import type { MatchSnapshot } from "../game/core/types";
 import { sfx } from "../game/audio";
+import { CinematicIntro } from "../components/CinematicIntro";
 
-export const Route = createFileRoute("/")({ component: FightApp });
+export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "47-FIGHT | Jogo de luta 2D" },
+      {
+        name: "description",
+        content: "Entre no 47-FIGHT, escolha seu lutador e dispute combates 2D em tempo real.",
+      },
+      { property: "og:title", content: "47-FIGHT | Jogo de luta 2D" },
+      {
+        property: "og:description",
+        content: "Escolha seu lutador e entre em combates 2D em tempo real no 47-FIGHT.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: FightApp,
+});
 
 type Screen = "menu" | "fighter" | "opponent" | "arena" | "fight";
 
 function FightApp() {
+  const [introComplete, setIntroComplete] = useState(false);
   const [screen, setScreen] = useState<Screen>("menu");
   const [fighter, setFighter] = useState<FighterId>("dictador");
   const [opponent, setOpponent] = useState<FighterId>("holofokiu");
@@ -33,12 +53,16 @@ function FightApp() {
     setScreen(next);
   };
 
-  if (screen === "fight") {
+  if (!introComplete) {
+    return <CinematicIntro onComplete={() => setIntroComplete(true)} />;
+  }
+
+  if (screen === "fight" && arena) {
     return (
       <FightScreen
         fighter={fighter}
         opponent={opponent}
-        arena={arena!}
+        arena={arena}
         difficulty={difficulty}
         sound={sound}
         onMenu={() => navigate("menu", true)}
