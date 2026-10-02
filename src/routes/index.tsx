@@ -17,6 +17,8 @@ import type { MatchSnapshot } from "../game/core/types";
 import { sfx } from "../game/audio";
 import { CinematicIntro } from "../components/CinematicIntro";
 import { GameLogo } from "../components/GameLogo";
+import { MainMenu } from "../components/MainMenu";
+import { GameModeSelection } from "../components/GameModeSelection";
 import { MapPin, Swords } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -39,7 +41,7 @@ export const Route = createFileRoute("/")({
   component: FightApp,
 });
 
-type Screen = "menu" | "fighter" | "opponent" | "arena" | "fight";
+type Screen = "menu" | "modes" | "fighter" | "opponent" | "arena" | "fight";
 
 function FightApp() {
   const [introComplete, setIntroComplete] = useState(false);
@@ -59,6 +61,25 @@ function FightApp() {
     return <CinematicIntro onComplete={() => setIntroComplete(true)} />;
   }
 
+  const updateSound = (enabled: boolean) => {
+    setSound(enabled);
+    sfx.setEnabled(enabled);
+    if (enabled) sfx.play("click");
+  };
+
+  if (screen === "menu") {
+    return <MainMenu sound={sound} onSoundChange={updateSound} onStart={() => navigate("modes")} />;
+  }
+
+  if (screen === "modes") {
+    return (
+      <GameModeSelection
+        onLocal={() => navigate("fighter")}
+        onBack={() => navigate("menu", true)}
+      />
+    );
+  }
+
   if (screen === "fight" && arena) {
     return (
       <FightScreen
@@ -76,43 +97,17 @@ function FightApp() {
     <main className={`ac-screen ac-shell ${screen === "arena" ? "ac-shell--arena" : ""}`}>
       <div className="ac-grid" aria-hidden="true" />
       <header className="ac-topbar">
-        <GameLogo
-          variant={screen === "menu" ? "header" : screen === "arena" ? "arena" : "header"}
-        />
+        <GameLogo variant={screen === "arena" ? "arena" : "header"} />
         <button
           className="ac-icon-btn"
           onClick={() => {
-            const next = !sound;
-            setSound(next);
-            sfx.setEnabled(next);
-            if (next) sfx.play("click");
+            updateSound(!sound);
           }}
           aria-label={sound ? "Desativar som" : "Ativar som"}
         >
           {sound ? "SOM ON" : "SOM OFF"}
         </button>
       </header>
-
-      {screen === "menu" && (
-        <section className="ac-hero ac-fade-in">
-          <div className="ac-hero-copy">
-            <p className="ac-kicker">PROTOCOLO DE COMBATE // 2047</p>
-            <GameLogo variant="hero" />
-            <p className="ac-tagline">Entre na arena. Domine o combate.</p>
-          </div>
-          <div className="ac-menu ac-rise">
-            <button className="ac-btn" data-variant="solid" onClick={() => navigate("fighter")}>
-              Jogar contra IA <span>›</span>
-            </button>
-            <button className="ac-btn" disabled>
-              Multiplayer <span className="ac-chip">Em desenvolvimento</span>
-            </button>
-            <div className="ac-controls-hint">
-              <b>TECLADO</b> A/D mover · W pular · S defender · J/K/L atacar
-            </div>
-          </div>
-        </section>
-      )}
 
       {screen === "fighter" && (
         <section className="ac-setup ac-fade-in">
@@ -123,7 +118,7 @@ function FightApp() {
           />
           <FighterRoster selected={fighter} onSelect={setFighter} />
           <div className="ac-actions">
-            <button className="ac-btn" data-variant="ghost" onClick={() => navigate("menu", true)}>
+            <button className="ac-btn" data-variant="ghost" onClick={() => navigate("modes", true)}>
               ‹ Voltar
             </button>
             <button className="ac-btn" data-variant="solid" onClick={() => navigate("opponent")}>
