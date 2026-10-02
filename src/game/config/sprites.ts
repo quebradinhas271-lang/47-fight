@@ -76,6 +76,16 @@ export const FIGHTER_SPRITES: Record<FighterId, FighterSpriteDef> = {
         offsetY: 4,
         scale: 1.22,
       },
+      walk: {
+        asset: "/assets/fighters/el-dictador-walk-sheet.png",
+        frameWidth: 256,
+        frameHeight: 256,
+        frameCount: 8,
+        frameRate: 12,
+        repeat: -1,
+        offsetY: 4,
+        scale: 1.22,
+      },
     },
   },
   holofokiu: {
