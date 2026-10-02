@@ -12,13 +12,13 @@ export const FIGHTER_SHADOWS: Record<FighterId, FighterShadowConfig> = {
   dictador: {
     shadowWidth: 82,
     shadowHeight: 12,
-    shadowOffsetY: 4,
+    shadowOffsetY: 0,
     shadowAlpha: 0.34,
   },
   holofokiu: {
-    shadowWidth: 98,
+    shadowWidth: 112,
     shadowHeight: 14,
-    shadowOffsetY: 4,
+    shadowOffsetY: 0,
     shadowAlpha: 0.36,
   },
 };
