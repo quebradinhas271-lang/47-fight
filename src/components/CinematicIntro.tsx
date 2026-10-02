@@ -11,14 +11,20 @@ export function CinematicIntro({ onComplete }: CinematicIntroProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const exitTimerRef = useRef<number | null>(null);
   const [isExiting, setIsExiting] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [needsPlaybackGesture, setNeedsPlaybackGesture] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
+    video.muted = false;
+    video.currentTime = 0;
+
     void video.play().catch(() => {
-      // Some browsers defer playback until the first user interaction.
+      // Do not fall back to muted playback: let the player explicitly start the intro with sound.
+      video.pause();
+      video.currentTime = 0;
+      setNeedsPlaybackGesture(true);
     });
 
     return () => {
@@ -29,23 +35,27 @@ export function CinematicIntro({ onComplete }: CinematicIntroProps) {
 
   const startGame = () => {
     if (isExiting) return;
+    videoRef.current?.pause();
     setIsExiting(true);
     exitTimerRef.current = window.setTimeout(() => {
-      videoRef.current?.pause();
       onComplete();
     }, EXIT_DURATION_MS);
   };
 
-  const enableSound = async () => {
+  const playIntro = async () => {
     const video = videoRef.current;
     if (!video) return;
+
+    video.pause();
+    video.currentTime = 0;
     video.muted = false;
-    setIsMuted(false);
+
     try {
       await video.play();
+      setNeedsPlaybackGesture(false);
     } catch {
-      video.muted = true;
-      setIsMuted(true);
+      video.pause();
+      video.currentTime = 0;
     }
   };
 
@@ -57,7 +67,6 @@ export function CinematicIntro({ onComplete }: CinematicIntroProps) {
         src={INTRO_VIDEO_PATH}
         autoPlay
         loop
-        muted={isMuted}
         playsInline
         preload="auto"
         disablePictureInPicture
@@ -66,13 +75,12 @@ export function CinematicIntro({ onComplete }: CinematicIntroProps) {
       />
 
       <button className="intro-start" type="button" onClick={startGame} aria-label="Iniciar jogo">
-        <span className="intro-start-mobile">TOQUE PARA INICIAR</span>
-        <span className="intro-start-desktop">CLIQUE PARA INICIAR</span>
+        TOQUE PARA INICIAR
       </button>
 
-      {isMuted && (
-        <button className="intro-sound" type="button" onClick={enableSound}>
-          ATIVAR SOM
+      {needsPlaybackGesture && (
+        <button className="intro-watch" type="button" onClick={playIntro}>
+          ASSISTIR INTRO
         </button>
       )}
     </section>
