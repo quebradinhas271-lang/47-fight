@@ -919,51 +919,119 @@
   }
 }
 
-/* Arena selection */
+/* Arena selection — clean scenery stays behind the interactive React interface. */
+.ac-shell--arena {
+  background: #08090d;
+}
+.ac-shell--arena .ac-grid {
+  display: none;
+}
+.ac-shell--arena .ac-topbar {
+  z-index: 5;
+}
+.ac-arena-selection {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: clamp(4.8rem, 11vh, 7.5rem) clamp(1rem, 4vw, 4rem) clamp(1rem, 4vh, 2.5rem);
+}
+.ac-arena-backgrounds,
+.ac-arena-background,
+.ac-arena-shade {
+  position: absolute;
+  inset: 0;
+}
+.ac-arena-backgrounds {
+  background: var(--gradient-arena);
+}
+.ac-arena-background {
+  background-size: cover;
+  background-position: center right;
+  opacity: 0;
+  transform: scale(1.015);
+  transition:
+    opacity 400ms ease,
+    transform 700ms ease;
+}
+.ac-arena-background[data-active="true"] {
+  opacity: 1;
+  transform: scale(1);
+}
+.ac-arena-shade {
+  background:
+    linear-gradient(90deg, #050609f7 0%, #07090de8 34%, #07090d80 58%, #0506091f 82%),
+    linear-gradient(0deg, #050609a8 0%, transparent 36%);
+  pointer-events: none;
+}
+.ac-arena-interface {
+  position: relative;
+  z-index: 2;
+  width: min(660px, 55vw);
+}
+.ac-arena-title {
+  margin-bottom: clamp(1rem, 2.5vh, 1.8rem);
+}
+.ac-arena-title > span,
+.ac-arena-details > small {
+  color: var(--primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+.ac-arena-title h1 {
+  margin-top: 0.3rem;
+  font-size: clamp(2.8rem, 5.2vw, 5rem);
+  line-height: 0.82;
+  text-transform: uppercase;
+  text-shadow: 0 5px 24px #000;
+}
+.ac-arena-title p {
+  margin-top: 0.7rem;
+  color: #c5c7cc;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
 .ac-arena-list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 0.65rem;
 }
 .ac-arena-card {
   position: relative;
+  min-height: 96px;
   padding: 0;
-  min-height: 310px;
   overflow: hidden;
   color: var(--foreground);
   text-align: left;
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: #12151ddd;
+  border: 1px solid #6f737e80;
+  border-bottom: 3px solid #6f737e;
   cursor: pointer;
   transition: var(--transition-snap);
 }
 .ac-arena-card:hover,
 .ac-arena-card[data-selected="true"] {
-  transform: translateY(-7px);
+  transform: translateY(-4px);
   border-color: var(--primary);
-  box-shadow: var(--glow-primary);
+  background: #1a1519ee;
+  box-shadow: 0 0 24px color-mix(in oklch, var(--primary) 38%, transparent);
+  outline: none;
 }
 .ac-arena-card[data-selected="true"]::after {
-  content: "SELECIONADA";
+  content: "";
   position: absolute;
-  top: 0;
-  right: 0;
-  padding: 0.35rem 0.65rem;
+  inset: 0 auto 0 0;
+  width: 4px;
   background: var(--primary);
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-}
-.ac-arena-card img {
-  width: 100%;
-  height: 190px;
-  object-fit: cover;
-  display: block;
 }
 .ac-arena-copy {
   display: grid;
-  gap: 0.3rem;
-  padding: 1rem;
+  gap: 0.4rem;
+  padding: 1rem 0.85rem;
 }
 .ac-arena-copy small {
   color: var(--primary);
@@ -971,25 +1039,123 @@
   letter-spacing: 0.12em;
 }
 .ac-arena-copy b {
-  font: 700 2rem/1 var(--font-display);
+  font: 700 clamp(1.25rem, 2.1vw, 1.8rem)/0.9 var(--font-display);
   text-transform: uppercase;
 }
-.ac-arena-copy span {
-  color: var(--muted-foreground);
-  font-size: 0.78rem;
+.ac-arena-details {
+  min-height: 104px;
+  margin-top: clamp(1rem, 2.6vh, 1.7rem);
+  padding-left: 1rem;
+  border-left: 2px solid var(--primary);
+}
+.ac-arena-details h2 {
+  margin-top: 0.15rem;
+  font: 700 clamp(2rem, 3.5vw, 3rem)/1 var(--font-display);
+  text-transform: uppercase;
+}
+.ac-arena-details p {
+  max-width: 520px;
+  color: #c5c7cc;
+  line-height: 1.35;
+}
+.ac-arena-actions {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) 150px;
+  gap: 0.7rem;
+  margin-top: clamp(0.8rem, 2vh, 1.3rem);
+}
+.ac-arena-actions .ac-btn[data-variant="ghost"] {
+  justify-content: center;
 }
 @media (max-width: 760px) {
+  .ac-arena-selection {
+    align-items: flex-end;
+    padding-top: 4.5rem;
+  }
+  .ac-arena-background {
+    background-position: 68% center;
+  }
+  .ac-arena-shade {
+    background: linear-gradient(0deg, #050609fa 0%, #07090de8 56%, #05060926 100%);
+  }
+  .ac-arena-interface {
+    width: 100%;
+  }
+  .ac-arena-title h1 {
+    font-size: clamp(2.3rem, 10vw, 3.5rem);
+  }
   .ac-arena-list {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .ac-arena-card {
-    min-height: 0;
-    display: grid;
-    grid-template-columns: 42% 1fr;
+    min-height: 76px;
   }
-  .ac-arena-card img {
-    height: 100%;
-    min-height: 145px;
+  .ac-arena-copy {
+    padding: 0.7rem 0.55rem;
+  }
+  .ac-arena-copy small {
+    font-size: 0.55rem;
+  }
+  .ac-arena-copy b {
+    font-size: clamp(1rem, 4.4vw, 1.4rem);
+  }
+  .ac-arena-details {
+    min-height: 82px;
+  }
+  .ac-arena-details h2 {
+    font-size: 1.8rem;
+  }
+  .ac-arena-details p {
+    font-size: 0.8rem;
+  }
+  .ac-arena-actions {
+    grid-template-columns: 1.6fr 1fr;
+  }
+  .ac-arena-actions .ac-btn {
+    min-height: 44px;
+    font-size: 1.1rem;
+    padding: 0.6rem;
+  }
+}
+
+@media (max-height: 620px) and (orientation: landscape) {
+  .ac-arena-selection {
+    padding-top: 3.8rem;
+    padding-bottom: 0.6rem;
+  }
+  .ac-arena-title {
+    margin-bottom: 0.65rem;
+  }
+  .ac-arena-title h1 {
+    font-size: 2.65rem;
+  }
+  .ac-arena-title p {
+    margin-top: 0.3rem;
+  }
+  .ac-arena-card {
+    min-height: 70px;
+  }
+  .ac-arena-copy {
+    padding: 0.55rem 0.7rem;
+  }
+  .ac-arena-details {
+    min-height: 70px;
+    margin-top: 0.65rem;
+  }
+  .ac-arena-details h2 {
+    font-size: 1.8rem;
+  }
+  .ac-arena-details p {
+    font-size: 0.75rem;
+  }
+  .ac-arena-actions {
+    margin-top: 0.55rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ac-arena-background {
+    transition-duration: 0.01ms;
   }
 }
 

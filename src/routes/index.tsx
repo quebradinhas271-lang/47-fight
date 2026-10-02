@@ -71,7 +71,7 @@ function FightApp() {
   }
 
   return (
-    <main className="ac-screen ac-shell">
+    <main className={`ac-screen ac-shell ${screen === "arena" ? "ac-shell--arena" : ""}`}>
       <div className="ac-grid" aria-hidden="true" />
       <header className="ac-topbar">
         <Logo compact={screen !== "menu"} />
@@ -158,55 +158,68 @@ function FightApp() {
       )}
 
       {screen === "arena" && (
-        <section className="ac-setup ac-fade-in">
-          <StepTitle
-            step="03"
-            title="Escolha sua arena"
-            subtitle="Defina o palco do próximo confronto"
-          />
-          <div className="ac-arena-list">
-            {ARENA_LIST.map((item, index) => (
-              <button
+        <section className="ac-arena-selection ac-fade-in">
+          <div className="ac-arena-backgrounds" aria-hidden="true">
+            {ARENA_LIST.map((item) => (
+              <div
                 key={item.id}
-                className="ac-arena-card"
-                data-selected={arena === item.id}
-                onClick={() => {
-                  setArena(item.id);
-                  sfx.play("click");
-                }}
-              >
-                <img
-                  src={item.image}
-                  alt={`Prévia da arena ${item.name}`}
-                  onError={(event) => {
-                    event.currentTarget.onerror = null;
-                    event.currentTarget.src = item.fallbackImage;
-                  }}
-                />
-                <span className="ac-arena-copy">
-                  <small>{String(index + 1).padStart(2, "0")} // ARENA</small>
-                  <b>{item.name}</b>
-                  <span>{item.description}</span>
-                </span>
-              </button>
+                className="ac-arena-background"
+                data-active={arena === item.id}
+                style={{ backgroundImage: `url(${item.selectionImage})` }}
+              />
             ))}
           </div>
-          <div className="ac-actions">
-            <button
-              className="ac-btn"
-              data-variant="ghost"
-              onClick={() => navigate("opponent", true)}
-            >
-              ‹ Voltar
-            </button>
-            <button
-              className="ac-btn"
-              data-variant="solid"
-              disabled={!arena}
-              onClick={() => arena && navigate("fight")}
-            >
-              {arena ? `Lutar em ${ARENAS[arena].name} ›` : "Selecione uma arena"}
-            </button>
+          <div className="ac-arena-shade" aria-hidden="true" />
+          <div className="ac-arena-interface">
+            <header className="ac-arena-title">
+              <span>03 // PRÓXIMO CONFRONTO</span>
+              <h1>Escolha sua arena</h1>
+              <p>Defina o palco da batalha</p>
+            </header>
+            <div className="ac-arena-list" aria-label="Arenas disponíveis">
+              {ARENA_LIST.map((item, index) => (
+                <button
+                  key={item.id}
+                  className="ac-arena-card"
+                  data-selected={arena === item.id}
+                  onClick={() => {
+                    setArena(item.id);
+                    sfx.play("click");
+                  }}
+                >
+                  <span className="ac-arena-copy">
+                    <small>{String(index + 1).padStart(2, "0")} // ARENA</small>
+                    <b>{item.name}</b>
+                  </span>
+                </button>
+              ))}
+            </div>
+            <div className="ac-arena-details" aria-live="polite">
+              <small>{arena ? "ARENA SELECIONADA" : "AGUARDANDO SELEÇÃO"}</small>
+              <h2>{arena ? ARENAS[arena].name : "Selecione um cenário"}</h2>
+              <p>
+                {arena
+                  ? ARENAS[arena].description
+                  : "Destaque uma das arenas acima para visualizar o campo de batalha."}
+              </p>
+            </div>
+            <div className="ac-arena-actions">
+              <button
+                className="ac-btn"
+                data-variant="solid"
+                disabled={!arena}
+                onClick={() => arena && navigate("fight")}
+              >
+                Confirmar <span>›</span>
+              </button>
+              <button
+                className="ac-btn"
+                data-variant="ghost"
+                onClick={() => navigate("opponent", true)}
+              >
+                ‹ Voltar
+              </button>
+            </div>
           </div>
         </section>
       )}
