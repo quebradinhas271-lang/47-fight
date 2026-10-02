@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { ARENAS, type ArenaId } from "../config/arenas";
 import { COMBAT, type Difficulty } from "../config/combat";
 import { FIGHTERS, type FighterId } from "../config/fighters";
+import { FIGHTER_SHADOWS } from "../config/shadows";
 import {
   FIGHTER_SPRITES,
   idleTextureKey,
@@ -635,13 +636,14 @@ export class ArenaScene extends Phaser.Scene {
     const H = COMBAT.BODY_HEIGHT;
     const t = f.animTime;
 
-    // sombra
+    // A sombra acompanha apenas o eixo horizontal e permanece projetada no chão durante saltos.
+    const shadow = FIGHTER_SHADOWS[s.id];
     const airLift = Math.max(0, COMBAT.GROUND_Y - y);
-    g.fillStyle(0x000000, 0.35 - Math.min(0.25, airLift / 1200)).fillEllipse(
+    g.fillStyle(0x000000, shadow.shadowAlpha - Math.min(0.25, airLift / 1200)).fillEllipse(
       x,
-      COMBAT.GROUND_Y + 8,
-      W * 1.25 - airLift * 0.08,
-      16,
+      COMBAT.GROUND_Y + shadow.shadowOffsetY,
+      Math.max(shadow.shadowHeight, shadow.shadowWidth - airLift * 0.08),
+      shadow.shadowHeight,
     );
 
     if (hasSprite) {
