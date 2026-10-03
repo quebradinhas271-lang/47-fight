@@ -1033,6 +1033,9 @@
 .ac-shell--arena .ac-topbar {
   z-index: 5;
 }
+.ac-shell--arena .ac-topbar--arena {
+  justify-content: flex-end;
+}
 .ac-arena-selection {
   position: absolute;
   z-index: 1;
@@ -1281,8 +1284,11 @@
 
 @media (max-height: 620px) and (orientation: landscape) {
   .ac-arena-selection {
-    padding-top: 3.8rem;
+    padding-top: max(3.15rem, calc(env(safe-area-inset-top) + 2.6rem));
     padding-bottom: 0.6rem;
+  }
+  .ac-arena-interface {
+    width: min(700px, 62vw);
   }
   .ac-arena-title {
     margin-bottom: 0.65rem;
@@ -1313,7 +1319,85 @@
     font-size: 0.75rem;
   }
   .ac-arena-actions {
+    width: 100%;
+    flex-direction: row-reverse;
     margin-top: 0.55rem;
+  }
+  .ac-arena-actions .ac-btn {
+    flex: 1;
+    min-height: 42px;
+    padding-block: 0.45rem;
+  }
+}
+
+@media (max-height: 430px) and (orientation: landscape) {
+  .ac-shell--arena {
+    padding-top: max(0.35rem, env(safe-area-inset-top));
+    padding-bottom: max(0.35rem, env(safe-area-inset-bottom));
+  }
+  .ac-shell--arena .ac-topbar {
+    min-height: 32px;
+  }
+  .ac-arena-selection {
+    padding-top: max(2.65rem, calc(env(safe-area-inset-top) + 2.3rem));
+    padding-bottom: max(0.35rem, env(safe-area-inset-bottom));
+  }
+  .ac-arena-interface {
+    width: min(720px, 68vw);
+  }
+  .ac-arena-title {
+    margin-bottom: 0.4rem;
+    padding-left: 0.7rem;
+  }
+  .ac-arena-title > span {
+    font-size: 0.58rem;
+  }
+  .ac-arena-title h1 {
+    margin-top: 0.1rem;
+    font-size: clamp(2rem, 10vh, 2.35rem);
+  }
+  .ac-arena-title p {
+    margin-top: 0.1rem;
+    font-size: 0.6rem;
+  }
+  .ac-arena-card {
+    min-height: 78px;
+  }
+  .ac-arena-card > img {
+    height: 44px;
+  }
+  .ac-arena-copy {
+    gap: 0.1rem;
+    padding: 0.35rem 0.65rem 0.4rem;
+  }
+  .ac-arena-copy small {
+    font-size: 0.5rem;
+  }
+  .ac-arena-copy b {
+    font-size: clamp(1rem, 4vh, 1.3rem);
+  }
+  .ac-arena-details {
+    min-height: 58px;
+    margin-top: 0.4rem;
+    padding: 0.5rem 0.8rem;
+  }
+  .ac-arena-details h2 {
+    margin-top: 0;
+    font-size: 1.35rem;
+  }
+  .ac-arena-details p {
+    font-size: 0.68rem;
+    line-height: 1.2;
+  }
+  .ac-arena-actions {
+    gap: 0.45rem;
+    margin-top: 0.35rem;
+  }
+  .ac-arena-actions .ac-btn,
+  .ac-arena-actions .ac-btn[data-variant="solid"] {
+    min-height: 38px;
+    padding-block: 0.3rem;
+    font-size: 1rem;
   }
 }
 
@@ -1345,7 +1429,7 @@
 .ac-mode-background {
   background-size: cover;
   background-repeat: no-repeat;
-  background-position: center right;
+  background-position: var(--mode-background-position, right center);
   opacity: 0;
   transform: scale(1.012);
   transition:
@@ -1594,7 +1678,7 @@
     background-position: 62% center;
   }
   .ac-mode-background {
-    background-position: 62% center;
+    background-position: 62% top;
   }
   .ac-cinematic-shade {
     background: linear-gradient(

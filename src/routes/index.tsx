@@ -96,8 +96,8 @@ function FightApp() {
   return (
     <main className={`ac-screen ac-shell ${screen === "arena" ? "ac-shell--arena" : ""}`}>
       <div className="ac-grid" aria-hidden="true" />
-      <header className="ac-topbar">
-        <GameLogo variant={screen === "arena" ? "arena" : "header"} />
+      <header className={`ac-topbar ${screen === "arena" ? "ac-topbar--arena" : ""}`}>
+        {screen !== "arena" && <GameLogo variant="header" />}
         <button
           className="ac-icon-btn"
           onClick={() => {
