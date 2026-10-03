@@ -903,7 +903,7 @@
   right: max(1rem, env(safe-area-inset-right));
   bottom: max(1rem, env(safe-area-inset-bottom));
   left: max(1rem, env(safe-area-inset-left));
-  display: none;
+  display: flex;
   justify-content: space-between;
   pointer-events: none;
 }
@@ -945,6 +945,26 @@
   height: 58px;
   border: 1px solid #ffffff60;
   background: #10131dcc;
+}
+.ac-touch-btn svg {
+  width: 48%;
+  height: 48%;
+  stroke-width: 2.25;
+  filter: drop-shadow(0 2px 2px #000);
+}
+.ac-gamepad-notice {
+  position: fixed;
+  z-index: 12;
+  left: 50%;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  translate: -50% 0;
+  padding: 0.55rem 1.1rem;
+  color: var(--brand-white);
+  background: rgb(8 8 9 / 90%);
+  border: 1px solid var(--brand-gold);
+  font: 800 0.72rem var(--font-sans);
+  letter-spacing: 0.16em;
+  animation: ac-rise 180ms ease-out;
 }
 .ac-touch-small {
   width: 48px;
@@ -1667,6 +1687,113 @@
   border: 1px solid var(--brand-scarlet);
   clip-path: polygon(5% 0, 100% 0, 100% 92%, 95% 100%, 0 100%, 0 8%);
   box-shadow: var(--shadow-panel), var(--glow-primary);
+}
+.ac-menu-panel:has(.ac-settings-content) {
+  width: min(680px, 100%);
+  max-height: calc(100dvh - 2rem);
+  overflow: hidden;
+}
+.ac-settings-content {
+  max-height: calc(100dvh - 6rem);
+  padding-inline: 0.2rem;
+  overflow-y: auto;
+  scrollbar-color: var(--brand-scarlet) #080809;
+}
+.ac-settings-content h3 {
+  margin: 1.25rem 0 0.55rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--brand-gold);
+  font: 800 0.72rem var(--font-sans);
+  letter-spacing: 0.16em;
+  text-align: left;
+  text-transform: uppercase;
+}
+.ac-settings-content h3 svg {
+  width: 17px;
+}
+.ac-key-bindings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+.ac-key-bindings button {
+  min-height: 42px;
+  padding: 0.5rem 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--brand-white);
+  background: #080809b8;
+  border: 1px solid var(--border);
+  font: 700 0.68rem var(--font-sans);
+  text-align: left;
+  cursor: pointer;
+}
+.ac-key-bindings button:focus-visible {
+  border-color: var(--brand-scarlet);
+  outline: none;
+}
+.ac-key-bindings kbd {
+  color: var(--brand-gold);
+  white-space: nowrap;
+}
+.ac-capture-help,
+.ac-setting-error {
+  margin: 0.45rem 0;
+  font-size: 0.68rem;
+}
+.ac-capture-help {
+  color: var(--muted-foreground);
+}
+.ac-setting-error {
+  color: var(--brand-scarlet);
+}
+.ac-reset-controls {
+  margin-top: 0.4rem;
+  padding: 0.55rem;
+  display: inline-flex;
+  gap: 0.45rem;
+  align-items: center;
+  color: var(--brand-white);
+  background: transparent;
+  border: 1px solid var(--brand-scarlet);
+  font: 800 0.65rem var(--font-sans);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.ac-reset-controls svg {
+  width: 14px;
+}
+.ac-choice-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+}
+.ac-choice-group button {
+  padding: 0.65rem 0.4rem;
+  color: var(--muted-foreground);
+  background: #080809b8;
+  border: 1px solid var(--border);
+  font: 700 0.68rem var(--font-sans);
+  cursor: pointer;
+}
+.ac-choice-group button[data-selected="true"] {
+  color: var(--brand-white);
+  border-color: var(--brand-scarlet);
+  background: #571018;
+}
+.ac-gamepad-status {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--muted-foreground);
+  font-size: 0.68rem;
+}
+.ac-gamepad-status b {
+  color: var(--brand-gold);
 }
 .ac-menu-panel h2 {
   margin: 0.2rem 0 1.3rem;
