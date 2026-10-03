@@ -1,9 +1,10 @@
 import type { ActionKey, LocalInput } from "./input";
+import { DEFAULT_GAMEPAD_BINDINGS, loadGamepadBindings } from "./controlSettings";
+import { GAMEPAD_FRAME_EVENT } from "../../components/GlobalGameControls";
 
 const DEADZONE = 0.22;
 
 export class GamepadController {
-  private frame = 0;
   private pressed = new Set<ActionKey>();
   private startPressed = false;
   private activeIndex: number | null = null;
@@ -17,12 +18,12 @@ export class GamepadController {
   start() {
     if (!("getGamepads" in navigator)) return;
     window.addEventListener("gamepaddisconnected", this.disconnect);
-    this.poll();
+    window.addEventListener(GAMEPAD_FRAME_EVENT, this.onFrame);
   }
 
   stop() {
-    cancelAnimationFrame(this.frame);
     window.removeEventListener("gamepaddisconnected", this.disconnect);
+    window.removeEventListener(GAMEPAD_FRAME_EVENT, this.onFrame);
     this.releaseAll();
   }
 
@@ -40,29 +41,27 @@ export class GamepadController {
     this.startPressed = false;
   }
 
-  private poll = () => {
-    const pads = navigator.getGamepads?.() ?? [];
-    const pad = Array.from(pads).find((item): item is Gamepad => Boolean(item?.connected));
-    if (pad) this.read(pad);
-    else if (this.activeIndex !== null)
-      this.disconnect({ gamepad: { index: this.activeIndex } } as GamepadEvent);
-    this.frame = requestAnimationFrame(this.poll);
-  };
+  private onFrame = (event: Event) =>
+    this.read((event as CustomEvent<{ pad: Gamepad }>).detail.pad);
 
   private read(pad: Gamepad) {
     const axisX = pad.axes[0] ?? 0;
     const axisY = pad.axes[1] ?? 0;
     const button = (index: number) => Boolean(pad.buttons[index]?.pressed);
+    const bindings = loadGamepadBindings();
     const states: Record<ActionKey, boolean> = {
-      left: axisX < -DEADZONE || button(14),
-      right: axisX > DEADZONE || button(15),
-      up: axisY < -0.55 || button(12),
-      light: button(0),
-      heavy: button(1),
-      special: button(3),
-      block: button(4) || button(5) || button(6) || button(7),
+      left: axisX < -DEADZONE || button(bindings.left),
+      right: axisX > DEADZONE || button(bindings.right),
+      up: axisY < -0.55 || button(bindings.up),
+      light: button(bindings.light),
+      heavy: button(bindings.heavy),
+      special: button(bindings.special),
+      block:
+        button(bindings.block) ||
+        (bindings.block === DEFAULT_GAMEPAD_BINDINGS.block &&
+          (button(5) || button(6) || button(7))),
     };
-    const start = button(9);
+    const start = button(bindings.pause);
     const hasActivity = Object.values(states).some(Boolean) || start;
     if (hasActivity && this.activeIndex !== pad.index) {
       this.activeIndex = pad.index;

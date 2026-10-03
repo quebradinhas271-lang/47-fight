@@ -2340,3 +2340,48 @@
     animation: none;
   }
 }
+/* Global controls stay above every route without changing the mounted game. */
+.ac-fullscreen-button {
+  position: fixed;
+  z-index: 10000;
+  top: max(10px, env(safe-area-inset-top));
+  right: max(10px, env(safe-area-inset-right));
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  color: #f1e8dd;
+  background: rgba(8, 8, 9, 0.78);
+  border: 1px solid #e9a044;
+  clip-path: polygon(
+    10px 0,
+    100% 0,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    0 100%,
+    0 10px
+  );
+}
+.ac-fullscreen-button svg {
+  width: 21px;
+}
+.ac-fullscreen-message {
+  position: fixed;
+  z-index: 10001;
+  top: 60px;
+  right: max(10px, env(safe-area-inset-right));
+  padding: 7px 12px;
+  color: #f1e8dd;
+  background: #080809;
+  border-left: 3px solid #bd101b;
+  font:
+    600 13px Rajdhani,
+    sans-serif;
+}
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid #e9a044 !important;
+  outline-offset: 3px;
+  filter: drop-shadow(0 0 7px #bd101b);
+}
