@@ -6,6 +6,7 @@ import {
   useState,
   type CSSProperties,
   type PointerEvent,
+  type ReactNode,
 } from "react";
 import { FIGHTERS, FIGHTER_LIST, type FighterId } from "../game/config/fighters";
 import { DEFAULT_MOVE_SPEED, type Difficulty } from "../game/config/combat";
@@ -13,6 +14,11 @@ import { ARENAS, ARENA_LIST, type ArenaId } from "../game/config/arenas";
 import { FIGHTER_SPRITES } from "../game/config/sprites";
 import { GameBus } from "../game/core/bus";
 import { LocalInput, type ActionKey } from "../game/core/input";
+import { GamepadController } from "../game/core/gamepad";
+import {
+  CONTROLS_CHANGED_EVENT,
+  loadVirtualControlsPreference,
+} from "../game/core/controlSettings";
 import type { MatchSnapshot } from "../game/core/types";
 import { sfx } from "../game/audio";
 import { CinematicIntro } from "../components/CinematicIntro";
@@ -20,7 +26,7 @@ import { GameLogo } from "../components/GameLogo";
 import { MainMenu } from "../components/MainMenu";
 import { GameModeSelection } from "../components/GameModeSelection";
 import { DifficultySelection } from "../components/DifficultySelection";
-import { MapPin, Swords } from "lucide-react";
+import { Footprints, HandFist, MapPin, Shield, Swords, Zap } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -344,6 +350,12 @@ function FightScreen({
   const [snapshot, setSnapshot] = useState<MatchSnapshot | null>(null);
   const [paused, setPaused] = useState(false);
   const previous = useRef<MatchSnapshot | null>(null);
+  const [virtualPreference, setVirtualPreference] = useState(loadVirtualControlsPreference);
+  const [activeMethod, setActiveMethod] = useState<"keyboard" | "touch" | "gamepad">("keyboard");
+  const [gamepadNotice, setGamepadNotice] = useState(false);
+  const touchCapable =
+    typeof navigator !== "undefined" &&
+    (navigator.maxTouchPoints > 0 || window.matchMedia("(pointer: coarse)").matches);
 
   useEffect(() => {
     sfx.setEnabled(sound);
@@ -389,6 +401,10 @@ function FightScreen({
     sfx.play("click");
     sceneRef.current?.setPaused(!paused);
   }, [paused, snapshot?.over]);
+  const togglePauseRef = useRef(togglePause);
+  useEffect(() => {
+    togglePauseRef.current = togglePause;
+  }, [togglePause]);
 
   useEffect(() => {
     const onEscape = (event: KeyboardEvent) => {
@@ -398,13 +414,58 @@ function FightScreen({
     return () => window.removeEventListener("keydown", onEscape);
   }, [togglePause]);
 
+  useEffect(() => {
+    const controller = new GamepadController(
+      inputRef.current,
+      () => {
+        setActiveMethod("gamepad");
+        window.dispatchEvent(new CustomEvent("47-fight:input-method", { detail: "gamepad" }));
+      },
+      () => togglePauseRef.current(),
+    );
+    const onStatus = (event: Event) => {
+      if ((event as CustomEvent<boolean>).detail) setGamepadNotice(true);
+      else setActiveMethod(touchCapable ? "touch" : "keyboard");
+    };
+    const onMethod = (event: Event) => {
+      const method = (event as CustomEvent<string>).detail;
+      if (method === "keyboard") setActiveMethod("keyboard");
+    };
+    controller.start();
+    window.addEventListener("47-fight:gamepad-status", onStatus);
+    window.addEventListener("47-fight:input-method", onMethod);
+    return () => {
+      controller.stop();
+      window.removeEventListener("47-fight:gamepad-status", onStatus);
+      window.removeEventListener("47-fight:input-method", onMethod);
+    };
+  }, [touchCapable]);
+
+  useEffect(() => {
+    if (!gamepadNotice) return;
+    const timeout = window.setTimeout(() => setGamepadNotice(false), 2200);
+    return () => window.clearTimeout(timeout);
+  }, [gamepadNotice]);
+
+  useEffect(() => {
+    const update = () => setVirtualPreference(loadVirtualControlsPreference());
+    window.addEventListener(CONTROLS_CHANGED_EVENT, update);
+    return () => window.removeEventListener(CONTROLS_CHANGED_EVENT, update);
+  }, []);
+
   const touch = (action: ActionKey, down: boolean) => (event: PointerEvent) => {
     event.preventDefault();
     if (down) {
       event.currentTarget.setPointerCapture(event.pointerId);
-      inputRef.current.press(action);
-    } else inputRef.current.release(action);
+      setActiveMethod("touch");
+      window.dispatchEvent(new CustomEvent("47-fight:input-method", { detail: "touch" }));
+      inputRef.current.press(action, `touch:${event.pointerId}`);
+    } else inputRef.current.release(action, `touch:${event.pointerId}`);
   };
+
+  const showTouchControls =
+    virtualPreference === "show" ||
+    (virtualPreference === "auto" && touchCapable && activeMethod !== "gamepad");
 
   const p1 = snapshot?.p1;
   const p2 = snapshot?.p2;
@@ -422,7 +483,12 @@ function FightScreen({
       <button className="ac-pause-button" onClick={togglePause} aria-label="Pausar partida">
         Ⅱ
       </button>
-      <TouchControls touch={touch} />
+      {showTouchControls && <TouchControls touch={touch} />}
+      {gamepadNotice && (
+        <div className="ac-gamepad-notice" role="status">
+          CONTROLE CONECTADO
+        </div>
+      )}
 
       {paused && !snapshot?.over && (
         <div className="ac-overlay">
@@ -565,14 +631,15 @@ function TouchControls({
     activePointer.current = null;
     setStick({ x: 0, y: 0 });
   };
-  const button = (action: ActionKey, label: string, className = "") => (
+  const button = (action: ActionKey, label: string, icon: ReactNode, className = "") => (
     <button
       className={`ac-touch-btn ${className}`}
+      aria-label={label}
       onPointerDown={touch(action, true)}
       onPointerUp={touch(action, false)}
       onPointerCancel={touch(action, false)}
     >
-      {label}
+      {icon}
     </button>
   );
   return (
@@ -596,10 +663,10 @@ function TouchControls({
         <span style={{ transform: `translate(${stick.x * 38}px, ${stick.y * 38}px)` }} />
       </div>
       <div className="ac-attacks">
-        {button("block", "DEF", "ac-touch-small")}
-        {button("light", "J")}
-        {button("heavy", "K")}
-        {button("special", "L", "ac-touch-special")}
+        {button("block", "Defender", <Shield aria-hidden="true" />, "ac-touch-small")}
+        {button("light", "Ataque leve, soco", <HandFist aria-hidden="true" />)}
+        {button("heavy", "Ataque pesado, chute", <Footprints aria-hidden="true" />)}
+        {button("special", "Ataque especial", <Zap aria-hidden="true" />, "ac-touch-special")}
       </div>
     </div>
   );
