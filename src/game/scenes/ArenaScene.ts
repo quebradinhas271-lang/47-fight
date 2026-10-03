@@ -53,6 +53,9 @@ interface FloatText {
 
 /** Compensa a pequena margem inferior dos PNGs sem deslocar a simulação/hitbox. */
 const IDLE_IMAGE_GROUND_OFFSET = 4;
+/** Distância curta o bastante para o golpe leve previsível alcançar o aluno. */
+const TUTORIAL_DEFENSE_DISTANCE = 125;
+const TUTORIAL_ATTACK_INTERVAL = 1.8;
 const arenaTextureKey = (arena: ArenaId) => `arena-${arena}`;
 const arenaFallbackTextureKey = (arena: ArenaId) => `arena-${arena}-fallback`;
 
@@ -81,6 +84,7 @@ export class ArenaScene extends Phaser.Scene {
   private airPasser: Fighter | null = null;
   private tutorialStep = 0;
   private tutorialAttackTimer = 0;
+  private p1SuccessfulBlocks = 0;
 
   constructor() {
     super("arena");
@@ -159,7 +163,24 @@ export class ArenaScene extends Phaser.Scene {
   setTutorialStep(step: number) {
     this.tutorialStep = step;
     this.tutorialAttackTimer = 0;
+    if (step === 4) {
+      this.p1SuccessfulBlocks = 0;
+      this.f1.vx = 0;
+      this.f2.vx = 0;
+      this.positionTutorialDummy();
+    }
     if (step === 5) this.f1.energy = this.f1.stats.maxEnergy;
+  }
+
+  /** Mantém o boneco ao alcance sem alterar alcance, dano ou física dos golpes. */
+  private positionTutorialDummy() {
+    const rightLimit = COMBAT.ARENA_WIDTH - COMBAT.WALL_MARGIN;
+    const leftLimit = COMBAT.WALL_MARGIN;
+    if (this.f1.x + TUTORIAL_DEFENSE_DISTANCE <= rightLimit) {
+      this.f2.x = this.f1.x + TUTORIAL_DEFENSE_DISTANCE;
+    } else {
+      this.f2.x = Math.max(leftLimit, this.f1.x - TUTORIAL_DEFENSE_DISTANCE);
+    }
   }
 
   resetMatch() {
@@ -174,6 +195,7 @@ export class ArenaScene extends Phaser.Scene {
     this.endTimer = 0;
     this.accumulator = 0;
     this.hitStop = 0;
+    this.p1SuccessfulBlocks = 0;
     this.airPasser = null;
     this.shake = 0;
     this.sparks = [];
@@ -220,7 +242,10 @@ export class ArenaScene extends Phaser.Scene {
     if (this.sceneData.mode === "tutorial" && !frozen) {
       // O boneco de treino só ataca durante a lição de defesa.
       this.tutorialAttackTimer += dt;
-      if (this.tutorialStep === 4 && this.tutorialAttackTimer > 1.4) {
+      if (this.tutorialStep === 4 && this.tutorialAttackTimer >= TUTORIAL_ATTACK_INTERVAL) {
+        // Reposiciona antes de cada tentativa para que recuos e movimentação não
+        // deixem o golpe fora de alcance. O intervalo fixo torna a prática legível.
+        this.positionTutorialDummy();
         i2.light = true;
         this.tutorialAttackTimer = 0;
       }
@@ -233,14 +258,21 @@ export class ArenaScene extends Phaser.Scene {
 
     const hits = resolveHits(this.f1, this.f2, this.over);
     for (const h of hits) {
+      if (h.blocked && h.defender === this.f1) this.p1SuccessfulBlocks += 1;
       this.spawnHit(h.x, h.y, h.blocked, h.damage, h.heavy, h.defender.stats.cssAccent);
       this.hitStop = h.blocked ? 0.03 : h.heavy ? 0.09 : 0.04;
       this.shake = h.blocked ? 3 : h.heavy ? 12 : 6;
     }
 
     if (!this.over && !intro) {
-      this.timeLeft = Math.max(0, this.timeLeft - dt);
-      if (!this.f1.alive || !this.f2.alive || this.timeLeft <= 0) this.finish();
+      if (this.sceneData.mode !== "tutorial") this.timeLeft = Math.max(0, this.timeLeft - dt);
+      if (
+        !this.f1.alive ||
+        !this.f2.alive ||
+        (this.sceneData.mode !== "tutorial" && this.timeLeft <= 0)
+      ) {
+        this.finish();
+      }
     }
 
     if (this.over) {
@@ -329,6 +361,7 @@ export class ArenaScene extends Phaser.Scene {
     const s: MatchSnapshot = {
       p1: this.snap(this.f1),
       p2: this.snap(this.f2),
+      p1SuccessfulBlocks: this.p1SuccessfulBlocks,
       timeLeft: Math.ceil(this.timeLeft),
       over: this.over,
       winner: this.winner,

@@ -49,6 +49,8 @@ export interface FighterSnapshot {
 export interface MatchSnapshot {
   p1: FighterSnapshot;
   p2: FighterSnapshot;
+  /** Golpes realmente bloqueados pelo jogador 1 na resolução de combate. */
+  p1SuccessfulBlocks: number;
   timeLeft: number;
   over: boolean;
   winner: "p1" | "p2" | "draw" | null;
