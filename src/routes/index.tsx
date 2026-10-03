@@ -17,6 +17,8 @@ import { LocalInput, type ActionKey } from "../game/core/input";
 import { GamepadController } from "../game/core/gamepad";
 import {
   CONTROLS_CHANGED_EVENT,
+  formatKeyCode,
+  loadKeyboardBindings,
   loadVirtualControlsPreference,
 } from "../game/core/controlSettings";
 import type { MatchSnapshot } from "../game/core/types";
@@ -48,7 +50,18 @@ export const Route = createFileRoute("/")({
   component: FightApp,
 });
 
-type Screen = "menu" | "modes" | "difficulty" | "fighter" | "opponent" | "arena" | "fight";
+type Screen =
+  | "menu"
+  | "modes"
+  | "invite"
+  | "difficulty"
+  | "fighter"
+  | "opponent"
+  | "arena"
+  | "fight"
+  | "tutorial";
+
+const TUTORIAL_INVITE_KEY = "47-fight.tutorial-invite.v1";
 
 function FightApp() {
   const [introComplete, setIntroComplete] = useState(false);
@@ -58,6 +71,9 @@ function FightApp() {
   const [arena, setArena] = useState<ArenaId | null>(null);
   const [difficulty, setDifficulty] = useState<Difficulty>("normal");
   const [sound, setSound] = useState(true);
+  const [tutorialInvite, setTutorialInvite] = useState(false);
+  const [tutorialStep, setTutorialStep] = useState(0);
+  const [menuSettings, setMenuSettings] = useState(false);
 
   const navigate = (next: Screen, back = false) => {
     sfx.play(back ? "back" : "click");
@@ -75,14 +91,98 @@ function FightApp() {
   };
 
   if (screen === "menu") {
-    return <MainMenu sound={sound} onSoundChange={updateSound} onStart={() => navigate("modes")} />;
+    return (
+      <MainMenu
+        sound={sound}
+        onSoundChange={updateSound}
+        onStart={() => navigate("modes")}
+        onTutorial={() => {
+          setTutorialStep(0);
+          navigate("tutorial");
+        }}
+        initialPanel={menuSettings ? "settings" : null}
+        resumeTutorial={
+          menuSettings
+            ? () => {
+                setMenuSettings(false);
+                navigate("tutorial");
+              }
+            : undefined
+        }
+      />
+    );
   }
 
   if (screen === "modes") {
     return (
       <GameModeSelection
-        onLocal={() => navigate("difficulty")}
+        onLocal={() => {
+          if (!localStorage.getItem(TUTORIAL_INVITE_KEY)) {
+            setTutorialInvite(true);
+            navigate("invite");
+          } else navigate("difficulty");
+        }}
         onBack={() => navigate("menu", true)}
+      />
+    );
+  }
+
+  if (screen === "invite" && tutorialInvite) {
+    return (
+      <main className="ac-cinematic-screen ac-tutorial-welcome">
+        <div className="ac-cinematic-shade" aria-hidden="true" />
+        <div
+          className="ac-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="tutorial-invite-title"
+        >
+          <div className="ac-modal ac-rise">
+            <GameLogo variant="modal" />
+            <span className="ac-kicker">PRIMEIROS PASSOS</span>
+            <h2 id="tutorial-invite-title">PREPARE-SE PARA LUTAR</h2>
+            <p>Deseja aprender os movimentos básicos do 47-FIGHT antes de entrar na arena?</p>
+            <button
+              className="ac-btn"
+              data-variant="solid"
+              onClick={() => {
+                localStorage.setItem(TUTORIAL_INVITE_KEY, "started");
+                setTutorialInvite(false);
+                setTutorialStep(0);
+                navigate("tutorial");
+              }}
+            >
+              Iniciar tutorial
+            </button>
+            <button
+              className="ac-btn"
+              data-variant="ghost"
+              onClick={() => {
+                localStorage.setItem(TUTORIAL_INVITE_KEY, "skipped");
+                setTutorialInvite(false);
+                navigate("difficulty");
+              }}
+            >
+              Pular tutorial
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (screen === "tutorial") {
+    return (
+      <TutorialScreen
+        step={tutorialStep}
+        onStep={setTutorialStep}
+        sound={sound}
+        onContinue={() => navigate("difficulty")}
+        onMenu={() => navigate("menu", true)}
+        onSettings={() => {
+          setMenuSettings(true);
+          navigate("menu");
+        }}
       />
     );
   }
@@ -326,6 +426,250 @@ function FighterPortrait({ fighter, name }: { fighter: FighterId; name: string }
   if (!portrait || loadFailed) return <span aria-hidden="true">{name[0]}</span>;
 
   return <img src={portrait} alt="" onError={() => setLoadFailed(true)} />;
+}
+
+type HelpMethod = "keyboard" | "gamepad" | "touch";
+
+const TUTORIAL_STEPS = [
+  {
+    title: "MOVIMENTAÇÃO",
+    text: "Ande para a esquerda e para a direita.",
+    action: "left" as ActionKey,
+  },
+  { title: "PULO", text: "Salte uma vez.", action: "up" as ActionKey },
+  { title: "ATAQUE LEVE", text: "Execute um soco.", action: "light" as ActionKey },
+  { title: "ATAQUE PESADO", text: "Execute um chute.", action: "heavy" as ActionKey },
+  {
+    title: "DEFESA",
+    text: "Segure a defesa. O boneco atacará para você praticar.",
+    action: "block" as ActionKey,
+  },
+  {
+    title: "ATAQUE ESPECIAL",
+    text: "Sua energia foi carregada. Use o especial.",
+    action: "special" as ActionKey,
+  },
+] as const;
+
+const GAMEPAD_LABELS: Record<ActionKey, string> = {
+  left: "ANALÓGICO / DIRECIONAL ←",
+  right: "ANALÓGICO / DIRECIONAL →",
+  up: "ANALÓGICO ↑ / DIRECIONAL ↑",
+  light: "BOTÃO A / ×",
+  heavy: "BOTÃO B / ○",
+  special: "BOTÃO Y / △",
+  block: "L1 / R1 / GATILHO",
+};
+
+const TOUCH_LABELS: Record<ActionKey, string> = {
+  left: "JOYSTICK ←",
+  right: "JOYSTICK →",
+  up: "JOYSTICK ↑",
+  light: "ÍCONE DE PUNHO",
+  heavy: "ÍCONE DE CHUTE",
+  special: "ÍCONE DE RAIO",
+  block: "ÍCONE DE ESCUDO",
+};
+
+function TutorialScreen({
+  step,
+  onStep,
+  sound,
+  onContinue,
+  onMenu,
+  onSettings,
+}: {
+  step: number;
+  onStep: (step: number) => void;
+  sound: boolean;
+  onContinue: () => void;
+  onMenu: () => void;
+  onSettings: () => void;
+}) {
+  const host = useRef<HTMLDivElement>(null);
+  const gameRef = useRef<import("phaser").Game | null>(null);
+  const sceneRef = useRef<import("../game/scenes/ArenaScene").ArenaScene | null>(null);
+  const inputRef = useRef(new LocalInput());
+  const previousX = useRef<number | null>(null);
+  const moved = useRef({ left: false, right: false });
+  const stepRef = useRef(step);
+  const completingRef = useRef(false);
+  const [method, setMethod] = useState<HelpMethod>(() =>
+    typeof navigator !== "undefined" && navigator.maxTouchPoints > 0 ? "touch" : "keyboard",
+  );
+  const [completed, setCompleted] = useState(false);
+  const [bindings, setBindings] = useState(loadKeyboardBindings);
+  const touchCapable =
+    typeof navigator !== "undefined" &&
+    (navigator.maxTouchPoints > 0 || window.matchMedia("(pointer: coarse)").matches);
+
+  const finishStep = useCallback(() => {
+    if (completingRef.current) return;
+    completingRef.current = true;
+    setCompleted(true);
+    window.setTimeout(() => {
+      setCompleted(false);
+      completingRef.current = false;
+      onStep(Math.min(6, stepRef.current + 1));
+    }, 550);
+  }, [onStep]);
+
+  useEffect(() => {
+    sfx.setEnabled(sound);
+    const bus = new GameBus();
+    const input = inputRef.current;
+    input.attachKeyboard();
+    const unsubscribe = bus.subscribe((snap) => {
+      const activeStep = stepRef.current;
+      if (activeStep >= 6 || completingRef.current) return;
+      const x = snap.p1.x;
+      if (activeStep === 0 && previousX.current !== null) {
+        if (x < previousX.current - 0.5) moved.current.left = true;
+        if (x > previousX.current + 0.5) moved.current.right = true;
+        if (moved.current.left && moved.current.right) finishStep();
+      }
+      previousX.current = x;
+      if (activeStep === 1 && snap.p1.state === "jump") finishStep();
+      if (activeStep === 2 && snap.p1.attackKind === "light") finishStep();
+      if (activeStep === 3 && snap.p1.attackKind === "heavy") finishStep();
+      if (activeStep === 4 && snap.p1.blocking) finishStep();
+      if (activeStep === 5 && snap.p1.attackKind === "special") finishStep();
+    });
+    let cancelled = false;
+    void import("../game/createGame").then(({ createGame, getArenaScene }) => {
+      if (cancelled || !host.current) return;
+      const game = createGame(host.current, {
+        p1: "dictador",
+        p2: "holofokiu",
+        arena: "coliseu",
+        difficulty: "normal",
+        mode: "tutorial",
+        bus,
+        input,
+      });
+      gameRef.current = game;
+      sceneRef.current = getArenaScene(game);
+      sceneRef.current?.setTutorialStep(stepRef.current);
+    });
+    return () => {
+      cancelled = true;
+      unsubscribe();
+      input.detach();
+      bus.clear();
+      gameRef.current?.destroy(true);
+    };
+  }, [finishStep, sound]);
+
+  useEffect(() => {
+    stepRef.current = step;
+    previousX.current = null;
+    sceneRef.current?.setTutorialStep(step);
+  }, [step]);
+  useEffect(() => {
+    const changed = () => setBindings(loadKeyboardBindings());
+    window.addEventListener(CONTROLS_CHANGED_EVENT, changed);
+    return () => window.removeEventListener(CONTROLS_CHANGED_EVENT, changed);
+  }, []);
+  useEffect(() => {
+    const controller = new GamepadController(
+      inputRef.current,
+      () => setMethod("gamepad"),
+      () => undefined,
+    );
+    const updateMethod = (event: Event) => {
+      const next = (event as CustomEvent<string>).detail;
+      if (next === "keyboard") setMethod("keyboard");
+    };
+    controller.start();
+    window.addEventListener("47-fight:input-method", updateMethod);
+    return () => {
+      controller.stop();
+      window.removeEventListener("47-fight:input-method", updateMethod);
+    };
+  }, []);
+
+  const touch = (action: ActionKey, down: boolean) => (event: PointerEvent) => {
+    event.preventDefault();
+    if (down) {
+      event.currentTarget.setPointerCapture(event.pointerId);
+      setMethod("touch");
+      inputRef.current.press(action, `touch:${event.pointerId}`);
+    } else inputRef.current.release(action, `touch:${event.pointerId}`);
+  };
+  const releaseTouch = useCallback(() => inputRef.current.releaseSource("touch:"), []);
+  const command = (action: ActionKey) =>
+    method === "keyboard"
+      ? formatKeyCode(bindings[action])
+      : method === "gamepad"
+        ? GAMEPAD_LABELS[action]
+        : TOUCH_LABELS[action];
+
+  return (
+    <main className="ac-fight-screen ac-tutorial-screen">
+      <div className="ac-game" ref={host} aria-label="Arena de treinamento" />
+      <section className="ac-tutorial-panel" aria-live="polite">
+        <div className="ac-tutorial-progress" aria-label={`Etapa ${Math.min(step + 1, 7)} de 7`}>
+          {Array.from({ length: 7 }, (_, index) => (
+            <i key={index} data-active={index <= step} />
+          ))}
+        </div>
+        {step < 6 ? (
+          <>
+            <small>ETAPA {String(step + 1).padStart(2, "0")} / 07</small>
+            <h1>{TUTORIAL_STEPS[step].title}</h1>
+            <p>{TUTORIAL_STEPS[step].text}</p>
+            <kbd>{command(TUTORIAL_STEPS[step].action)}</kbd>
+            {step === 0 && <kbd>{command("right")}</kbd>}
+            {completed && <strong className="ac-tutorial-success">CONCLUÍDO!</strong>}
+          </>
+        ) : (
+          <>
+            <small>ETAPA 07 / 07</small>
+            <h1>TREINAMENTO CONCLUÍDO</h1>
+            <p>Você está pronto para entrar na arena.</p>
+            <div className="ac-tutorial-finish">
+              <button onClick={onContinue}>Continuar para o jogo</button>
+              <button
+                onClick={() => {
+                  moved.current = { left: false, right: false };
+                  onStep(0);
+                }}
+              >
+                Repetir tutorial
+              </button>
+              <button onClick={onMenu}>Voltar ao menu</button>
+            </div>
+          </>
+        )}
+      </section>
+      <div className="ac-tutorial-methods" role="group" aria-label="Método exibido">
+        {(["keyboard", "gamepad", "touch"] as HelpMethod[]).map((value) => (
+          <button key={value} data-selected={method === value} onClick={() => setMethod(value)}>
+            {value === "keyboard" ? "Teclado" : value === "gamepad" ? "Gamepad" : "Touch"}
+          </button>
+        ))}
+      </div>
+      {(touchCapable || method === "touch") && method === "touch" && (
+        <TouchControls touch={touch} releaseAll={releaseTouch} />
+      )}
+      <aside className="ac-tutorial-guide">
+        <b>PERSONALIZE SEUS CONTROLES</b>
+        <span>Menu Principal › Configurações › Controles do teclado</span>
+        <p>
+          Selecione o comando, pressione a nova tecla e confirme a alteração exibida. Use “Restaurar
+          controles padrão” para voltar ao esquema original.
+        </p>
+        <p>
+          <b>Controles virtuais:</b> Automático, Sempre exibir ou Sempre ocultar.
+        </p>
+        <button onClick={onSettings}>Abrir configurações</button>
+      </aside>
+      <div className="ac-tutorial-actions">
+        {step < 6 && <button onClick={() => onStep(step + 1)}>Pular etapa</button>}
+        <button onClick={onMenu}>Sair do tutorial</button>
+      </div>
+    </main>
+  );
 }
 
 function FightScreen({
