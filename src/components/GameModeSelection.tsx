@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { ArrowLeft, Bot, Dumbbell, Users } from "lucide-react";
 import { GameLogo } from "./GameLogo";
 import { MenuActionButton } from "./MenuActionButton";
@@ -6,14 +6,27 @@ import { MenuActionButton } from "./MenuActionButton";
 type ModeId = "local" | "multiplayer" | "training";
 
 const MODES = [
-  { id: "local", label: "Contra IA", image: "/assets/ui/game-mode-selection/local.png" },
+  {
+    id: "local",
+    label: "Contra IA",
+    image: "/assets/ui/game-mode-selection/local.png",
+    position: "right 18%",
+  },
   {
     id: "multiplayer",
     label: "Multiplayer",
     image: "/assets/ui/game-mode-selection/multiplayer.png",
+    position: "right top",
   },
-  { id: "training", label: "Treino", image: "/assets/ui/game-mode-selection/treino.png" },
+  {
+    id: "training",
+    label: "Treino",
+    image: "/assets/ui/game-mode-selection/treino.png",
+    position: "right 8%",
+  },
 ] as const;
+
+type ModeBackgroundStyle = CSSProperties & { "--mode-background-position": string };
 
 type GameModeSelectionProps = {
   onLocal: () => void;
@@ -31,7 +44,12 @@ export function GameModeSelection({ onLocal, onBack }: GameModeSelectionProps) {
             key={mode.id}
             className="ac-mode-background"
             data-active={highlighted === mode.id}
-            style={{ backgroundImage: `url(${mode.image})` }}
+            style={
+              {
+                backgroundImage: `url(${mode.image})`,
+                "--mode-background-position": mode.position,
+              } as ModeBackgroundStyle
+            }
           />
         ))}
       </div>
