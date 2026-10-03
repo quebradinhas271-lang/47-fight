@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useImmersiveLandscape } from "../hooks/use-immersive-landscape";
 
 export const INTRO_VIDEO_PATH = "/assets/videos/intro.mp4";
 const EXIT_DURATION_MS = 520;
@@ -8,6 +9,7 @@ type CinematicIntroProps = {
 };
 
 export function CinematicIntro({ onComplete }: CinematicIntroProps) {
+  const requestImmersiveLandscape = useImmersiveLandscape();
   const videoRef = useRef<HTMLVideoElement>(null);
   const exitTimerRef = useRef<number | null>(null);
   const [isExiting, setIsExiting] = useState(false);
@@ -36,6 +38,7 @@ export function CinematicIntro({ onComplete }: CinematicIntroProps) {
   const startGame = () => {
     if (isExiting) return;
     videoRef.current?.pause();
+    requestImmersiveLandscape();
     setIsExiting(true);
     exitTimerRef.current = window.setTimeout(() => {
       onComplete();

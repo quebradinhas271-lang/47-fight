@@ -103,6 +103,8 @@
   body,
   #root {
     height: 100%;
+    width: 100%;
+    overflow: hidden;
   }
 
   body {
@@ -119,6 +121,91 @@
   .font-display {
     font-family: var(--font-display);
     letter-spacing: 0.04em;
+  }
+}
+
+.landscape-app {
+  width: 100%;
+  height: 100%;
+}
+
+/* Global mobile gate: it overlays rather than unmounting the active game screen. */
+.rotate-device {
+  position: fixed;
+  z-index: 2147483647;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: max(1.5rem, env(safe-area-inset-top)) max(1.5rem, env(safe-area-inset-right))
+    max(1.5rem, env(safe-area-inset-bottom)) max(1.5rem, env(safe-area-inset-left));
+  color: var(--brand-white);
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% 35%, rgb(189 16 27 / 30%), transparent 38%),
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 3%) 0 1px, transparent 1px 4px),
+    var(--brand-black);
+  touch-action: none;
+}
+.rotate-device__content {
+  width: min(32rem, 100%);
+  display: grid;
+  justify-items: center;
+}
+.rotate-device .game-logo {
+  width: min(18rem, 74vw);
+  max-height: 8rem;
+}
+.rotate-device__phone {
+  width: 3.9rem;
+  height: 6.6rem;
+  margin: 1.8rem 0 1.4rem;
+  display: grid;
+  place-items: center;
+  border: 0.22rem solid var(--brand-gold);
+  border-radius: 0.65rem;
+  box-shadow: var(--glow-accent);
+  animation: rotate-device-phone 2.2s ease-in-out infinite;
+}
+.rotate-device__phone::before {
+  content: "";
+  align-self: start;
+  width: 1.5rem;
+  height: 0.18rem;
+  margin-top: 0.32rem;
+  border-radius: 1rem;
+  background: var(--brand-gold);
+}
+.rotate-device__phone span {
+  width: 2.8rem;
+  height: 3.8rem;
+  border: 1px solid rgb(241 232 221 / 35%);
+  background: linear-gradient(145deg, rgb(189 16 27 / 60%), rgb(8 8 9 / 80%));
+}
+.rotate-device h1 {
+  font-size: clamp(2rem, 9vw, 3.5rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+  color: var(--brand-white);
+  text-shadow: 0 3px 18px #000;
+}
+.rotate-device p {
+  max-width: 27rem;
+  margin-top: 0.8rem;
+  color: var(--muted-foreground);
+  font-weight: 600;
+}
+@keyframes rotate-device-phone {
+  0%,
+  18% {
+    transform: rotate(0deg);
+  }
+  48%,
+  75% {
+    transform: rotate(90deg);
+  }
+  100% {
+    transform: rotate(0deg);
   }
 }
 
@@ -303,7 +390,9 @@
 
 /* 47-FIGHT — application shell */
 .ac-shell {
-  padding: 1.25rem clamp(1rem, 4vw, 4rem);
+  padding: max(1.25rem, env(safe-area-inset-top))
+    max(clamp(1rem, 4vw, 4rem), env(safe-area-inset-right))
+    max(1.25rem, env(safe-area-inset-bottom)) max(clamp(1rem, 4vw, 4rem), env(safe-area-inset-left));
   display: flex;
   flex-direction: column;
 }
@@ -719,8 +808,8 @@
 .ac-pause-button {
   position: absolute;
   z-index: 4;
-  right: 1rem;
-  top: 1rem;
+  right: max(1rem, env(safe-area-inset-right));
+  top: max(1rem, env(safe-area-inset-top));
   width: 42px;
   height: 42px;
   border: 1px solid var(--steel);
@@ -765,7 +854,9 @@
 .ac-touch-controls {
   position: absolute;
   z-index: 5;
-  inset: auto 1rem max(1rem, env(safe-area-inset-bottom));
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  left: max(1rem, env(safe-area-inset-left));
   display: none;
   justify-content: space-between;
   pointer-events: none;
@@ -819,10 +910,13 @@
   background: #6f1018cc;
 }
 
-@media (pointer: coarse), (max-width: 800px) {
+@media (pointer: coarse) {
   .ac-touch-controls {
     display: flex;
   }
+}
+
+@media (max-width: 800px) and (orientation: portrait) {
   .ac-hero {
     grid-template-columns: 1fr;
     align-content: center;
@@ -875,7 +969,7 @@
   }
 }
 
-@media (max-width: 540px) {
+@media (max-width: 540px) and (orientation: portrait) {
   .ac-shell {
     padding: 0.8rem;
   }
@@ -1495,7 +1589,7 @@
   line-height: 1.6;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 700px) and (orientation: portrait) {
   .ac-cinematic-screen {
     background-position: 62% center;
   }
@@ -1570,11 +1664,133 @@
   }
 }
 
+/* Compact horizontal composition for phones without turning menus into a vertical layout. */
+@media (max-height: 600px) and (orientation: landscape) {
+  .ac-shell {
+    padding-top: max(0.45rem, env(safe-area-inset-top));
+    padding-bottom: max(0.45rem, env(safe-area-inset-bottom));
+  }
+  .ac-topbar {
+    min-height: 38px;
+  }
+  .game-logo--header {
+    width: 76px;
+    max-height: 38px;
+  }
+  .ac-setup {
+    padding: 0.25rem 0;
+  }
+  .ac-step-title {
+    gap: 0.7rem;
+    margin-bottom: 0.5rem;
+  }
+  .ac-step-title > span {
+    padding-right: 0.7rem;
+    font-size: 2rem;
+  }
+  .ac-step-title h1 {
+    font-size: clamp(1.7rem, 5vh, 2.4rem);
+  }
+  .ac-step-title p {
+    margin-top: 0.1rem;
+    font-size: 0.65rem;
+  }
+  .ac-roster {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+  .ac-fighter-card {
+    min-height: min(42vh, 225px);
+  }
+  .ac-fighter-info {
+    padding: 0.65rem;
+  }
+  .ac-fighter-name {
+    font-size: clamp(1.7rem, 7vh, 2.5rem);
+  }
+  .ac-fighter-description {
+    display: none;
+  }
+  .ac-stat {
+    grid-template-columns: 62px 1fr;
+  }
+  .ac-special {
+    margin-top: 0.35rem;
+  }
+  .ac-versus {
+    position: absolute;
+    left: 50%;
+    bottom: 0.7rem;
+    margin: 0;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+  }
+  .ac-actions {
+    grid-template-columns: minmax(120px, 180px) minmax(230px, 340px);
+    margin-top: 0.5rem;
+  }
+  .ac-actions .ac-btn {
+    min-height: 38px;
+    padding-block: 0.45rem;
+    font-size: 1.1rem;
+  }
+  .ac-menu-overlay,
+  .ac-overlay {
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+  .ac-menu-panel,
+  .ac-modal {
+    width: min(390px, 72vw);
+    padding: 0.8rem 1.25rem;
+  }
+  .ac-menu-panel .game-logo,
+  .ac-modal .game-logo {
+    max-height: 45px;
+    margin-bottom: 0.25rem;
+  }
+  .ac-menu-panel h2,
+  .ac-modal h2 {
+    margin-block: 0.15rem 0.45rem;
+    font-size: 2.5rem;
+  }
+  .ac-modal .ac-btn {
+    min-height: 36px;
+    margin-top: 0.35rem;
+    padding-block: 0.4rem;
+    font-size: 1.15rem;
+  }
+  .ac-modal small {
+    margin-top: 0.35rem;
+  }
+  .ac-touch-controls {
+    bottom: max(0.45rem, env(safe-area-inset-bottom));
+  }
+  .ac-joystick {
+    width: min(25vh, 108px);
+    height: min(25vh, 108px);
+  }
+  .ac-joystick > span {
+    width: 44px;
+    height: 44px;
+  }
+  .ac-touch-btn {
+    width: min(13vh, 52px);
+    height: min(13vh, 52px);
+  }
+  .ac-touch-small {
+    width: min(11vh, 44px);
+    height: min(11vh, 44px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ac-mode-background,
   .ac-cinematic-button,
-  .ac-cinematic-button__arrow {
+  .ac-cinematic-button__arrow,
+  .rotate-device__phone {
     transition-duration: 0.01ms;
+    animation: none;
   }
 }
 
