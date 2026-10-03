@@ -41,6 +41,9 @@ export interface FighterSnapshot {
   state: FighterState;
   combo: number;
   cssColor: string;
+  x: number;
+  blocking: boolean;
+  attackKind: "light" | "heavy" | "special" | null;
 }
 
 export interface MatchSnapshot {

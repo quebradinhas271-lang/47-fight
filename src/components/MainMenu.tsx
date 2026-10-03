@@ -28,12 +28,22 @@ type MainMenuProps = {
   sound: boolean;
   onSoundChange: (enabled: boolean) => void;
   onStart: () => void;
+  onTutorial: () => void;
+  resumeTutorial?: () => void;
+  initialPanel?: Panel;
 };
 
 type Panel = "settings" | "credits" | null;
 
-export function MainMenu({ sound, onSoundChange, onStart }: MainMenuProps) {
-  const [panel, setPanel] = useState<Panel>(null);
+export function MainMenu({
+  sound,
+  onSoundChange,
+  onStart,
+  onTutorial,
+  resumeTutorial,
+  initialPanel = null,
+}: MainMenuProps) {
+  const [panel, setPanel] = useState<Panel>(initialPanel);
   const [bindings, setBindings] = useState(loadKeyboardBindings);
   const [virtualControls, setVirtualControls] = useState(loadVirtualControlsPreference);
   const [capturing, setCapturing] = useState<ActionKey | null>(null);
@@ -113,6 +123,9 @@ export function MainMenu({ sound, onSoundChange, onStart }: MainMenuProps) {
           </MenuActionButton>
           <MenuActionButton icon={Settings} onClick={() => setPanel("settings")}>
             Configurações
+          </MenuActionButton>
+          <MenuActionButton icon={Gamepad2} onClick={onTutorial}>
+            Tutorial
           </MenuActionButton>
           <MenuActionButton icon={Info} onClick={() => setPanel("credits")}>
             Créditos
@@ -227,6 +240,11 @@ export function MainMenu({ sound, onSoundChange, onStart }: MainMenuProps) {
                     Método ativo: <b>{inputMethod}</b>
                   </span>
                 </div>
+                {resumeTutorial && (
+                  <button className="ac-reset-controls" onClick={resumeTutorial}>
+                    <Play aria-hidden="true" /> Retornar ao tutorial
+                  </button>
+                )}
               </div>
             ) : (
               <>

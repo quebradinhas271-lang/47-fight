@@ -27,7 +27,7 @@ export interface ArenaSceneData {
   p2: FighterId;
   arena: ArenaId;
   difficulty: Difficulty;
-  mode: "ai" | "online";
+  mode: "ai" | "online" | "tutorial";
   bus: GameBus;
   input: LocalInput;
 }
@@ -79,6 +79,8 @@ export class ArenaScene extends Phaser.Scene {
   private hitStop = 0;
   /** Lutador autorizado a concluir um cross-up depois de passar sobre a hurtbox rival. */
   private airPasser: Fighter | null = null;
+  private tutorialStep = 0;
+  private tutorialAttackTimer = 0;
 
   constructor() {
     super("arena");
@@ -153,6 +155,13 @@ export class ArenaScene extends Phaser.Scene {
     this.ai.setDifficulty(d);
   }
 
+  /** Configura somente a demonstração; não altera os perfis normais da IA. */
+  setTutorialStep(step: number) {
+    this.tutorialStep = step;
+    this.tutorialAttackTimer = 0;
+    if (step === 5) this.f1.energy = this.f1.stats.maxEnergy;
+  }
+
   resetMatch() {
     this.f1.reset(380, 1);
     this.f2.reset(900, -1);
@@ -206,10 +215,16 @@ export class ArenaScene extends Phaser.Scene {
 
     const frozen = intro || this.over;
     const i1: InputState = frozen ? { ...EMPTY_INPUT } : this.sceneData.input.sample();
-    const i2: InputState =
-      this.sceneData.mode === "ai"
-        ? this.ai.update(dt, this.f2, this.f1, frozen)
-        : { ...EMPTY_INPUT };
+    let i2: InputState = { ...EMPTY_INPUT };
+    if (this.sceneData.mode === "ai") i2 = this.ai.update(dt, this.f2, this.f1, frozen);
+    if (this.sceneData.mode === "tutorial" && !frozen) {
+      // O boneco de treino só ataca durante a lição de defesa.
+      this.tutorialAttackTimer += dt;
+      if (this.tutorialStep === 4 && this.tutorialAttackTimer > 1.4) {
+        i2.light = true;
+        this.tutorialAttackTimer = 0;
+      }
+    }
 
     const previousSeparation = this.f2.x - this.f1.x;
     this.f1.step(dt, i1, this.f2.x, frozen);
@@ -304,6 +319,9 @@ export class ArenaScene extends Phaser.Scene {
       state: f.state,
       combo: f.comboCount,
       cssColor: f.stats.cssColor,
+      x: f.x,
+      blocking: f.blocking,
+      attackKind: f.attackKind,
     };
   }
 

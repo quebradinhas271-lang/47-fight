@@ -976,6 +976,168 @@
   background: #6f1018cc;
 }
 
+/* Tutorial interativo sobre a mesma arena de combate */
+.ac-tutorial-welcome {
+  background: #080809;
+}
+.ac-tutorial-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, #08080980 0, transparent 32%, #08080999 100%);
+}
+.ac-tutorial-panel {
+  position: absolute;
+  z-index: 6;
+  top: max(0.65rem, env(safe-area-inset-top));
+  left: 50%;
+  translate: -50% 0;
+  width: min(34rem, 54vw);
+  padding: 0.7rem 1rem;
+  text-align: center;
+  color: #f1e8dd;
+  background: #080809e8;
+  border: 1px solid #bd101b;
+  box-shadow: 0 0 28px #bd101b55;
+}
+.ac-tutorial-panel small {
+  color: #e9a044;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+}
+.ac-tutorial-panel h1 {
+  margin: 0.05rem 0;
+  font: 700 clamp(1.6rem, 4vh, 2.8rem)/1 var(--font-display);
+}
+.ac-tutorial-panel p {
+  margin: 0.2rem 0 0.45rem;
+  font-size: clamp(0.7rem, 1.7vh, 0.95rem);
+}
+.ac-tutorial-panel kbd {
+  display: inline-block;
+  margin: 0 0.2rem;
+  padding: 0.28rem 0.65rem;
+  color: #080809;
+  background: #f1e8dd;
+  border-bottom: 3px solid #e9a044;
+  font-weight: 900;
+}
+.ac-tutorial-progress {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+  margin-bottom: 0.35rem;
+}
+.ac-tutorial-progress i {
+  height: 3px;
+  background: #f1e8dd33;
+}
+.ac-tutorial-progress i[data-active="true"] {
+  background: #f04a20;
+}
+.ac-tutorial-success {
+  display: block;
+  margin-top: 0.25rem;
+  color: #e9a044;
+}
+.ac-tutorial-methods,
+.ac-tutorial-actions {
+  position: absolute;
+  z-index: 8;
+  display: flex;
+  gap: 0.3rem;
+}
+.ac-tutorial-methods {
+  top: max(0.65rem, env(safe-area-inset-top));
+  left: max(0.6rem, env(safe-area-inset-left));
+}
+.ac-tutorial-actions {
+  right: max(0.6rem, env(safe-area-inset-right));
+  bottom: max(0.6rem, env(safe-area-inset-bottom));
+}
+.ac-tutorial-methods button,
+.ac-tutorial-actions button,
+.ac-tutorial-guide button,
+.ac-tutorial-finish button {
+  padding: 0.45rem 0.65rem;
+  color: #f1e8dd;
+  background: #080809e8;
+  border: 1px solid #e9a044;
+  text-transform: uppercase;
+  font: 800 0.62rem var(--font-sans);
+  cursor: pointer;
+}
+.ac-tutorial-methods button[data-selected="true"] {
+  background: #bd101b;
+  border-color: #f04a20;
+}
+.ac-tutorial-guide {
+  position: absolute;
+  z-index: 7;
+  left: max(0.6rem, env(safe-area-inset-left));
+  bottom: max(0.6rem, env(safe-area-inset-bottom));
+  width: min(22rem, 31vw);
+  padding: 0.55rem 0.7rem;
+  color: #f1e8dd;
+  background: #080809e8;
+  border-left: 3px solid #e9a044;
+  font-size: clamp(0.58rem, 1.35vh, 0.76rem);
+}
+.ac-tutorial-guide > b,
+.ac-tutorial-guide > span {
+  display: block;
+}
+.ac-tutorial-guide > b {
+  color: #e9a044;
+  letter-spacing: 0.08em;
+}
+.ac-tutorial-guide p {
+  margin: 0.25rem 0;
+  color: #f1e8ddcc;
+}
+.ac-tutorial-finish {
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+.ac-tutorial-screen .ac-touch-controls {
+  z-index: 7;
+  bottom: 3.2rem;
+}
+
+@media (max-height: 520px) {
+  .ac-tutorial-panel {
+    padding: 0.4rem 0.7rem;
+  }
+  .ac-tutorial-guide {
+    width: 30vw;
+  }
+  .ac-tutorial-guide p {
+    display: none;
+  }
+  .ac-tutorial-screen .ac-touch-controls {
+    bottom: 2.8rem;
+  }
+  .ac-tutorial-screen .ac-joystick {
+    width: 82px;
+    height: 82px;
+  }
+  .ac-tutorial-screen .ac-touch-btn {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ac-tutorial-panel,
+  .ac-tutorial-success {
+    animation: none;
+    transition: none;
+  }
+}
+
 @media (pointer: coarse) {
   .ac-touch-controls {
     display: flex;
