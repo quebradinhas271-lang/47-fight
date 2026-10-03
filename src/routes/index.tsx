@@ -462,6 +462,7 @@ function FightScreen({
       inputRef.current.press(action, `touch:${event.pointerId}`);
     } else inputRef.current.release(action, `touch:${event.pointerId}`);
   };
+  const releaseTouch = useCallback(() => inputRef.current.releaseSource("touch:"), []);
 
   const showTouchControls =
     virtualPreference === "show" ||
@@ -483,7 +484,7 @@ function FightScreen({
       <button className="ac-pause-button" onClick={togglePause} aria-label="Pausar partida">
         Ⅱ
       </button>
-      {showTouchControls && <TouchControls touch={touch} />}
+      {showTouchControls && <TouchControls touch={touch} releaseAll={releaseTouch} />}
       {gamepadNotice && (
         <div className="ac-gamepad-notice" role="status">
           CONTROLE CONECTADO
@@ -582,14 +583,18 @@ function HudFighter({
 
 function TouchControls({
   touch,
+  releaseAll,
 }: {
   touch: (action: ActionKey, down: boolean) => (event: PointerEvent) => void;
+  releaseAll: () => void;
 }) {
   const [stick, setStick] = useState({ x: 0, y: 0 });
   const activePointer = useRef<number | null>(null);
   const joystickActions = useRef({ left: false, right: false, up: false });
   const JOYSTICK_DEADZONE = 0.22;
   const JOYSTICK_JUMP_THRESHOLD = -0.45;
+
+  useEffect(() => releaseAll, [releaseAll]);
 
   const updateJoystick = (event: PointerEvent<HTMLDivElement>) => {
     event.preventDefault();
