@@ -19,6 +19,7 @@ import { CinematicIntro } from "../components/CinematicIntro";
 import { GameLogo } from "../components/GameLogo";
 import { MainMenu } from "../components/MainMenu";
 import { GameModeSelection } from "../components/GameModeSelection";
+import { DifficultySelection } from "../components/DifficultySelection";
 import { MapPin, Swords } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -41,7 +42,7 @@ export const Route = createFileRoute("/")({
   component: FightApp,
 });
 
-type Screen = "menu" | "modes" | "fighter" | "opponent" | "arena" | "fight";
+type Screen = "menu" | "modes" | "difficulty" | "fighter" | "opponent" | "arena" | "fight";
 
 function FightApp() {
   const [introComplete, setIntroComplete] = useState(false);
@@ -49,7 +50,7 @@ function FightApp() {
   const [fighter, setFighter] = useState<FighterId>("dictador");
   const [opponent, setOpponent] = useState<FighterId>("holofokiu");
   const [arena, setArena] = useState<ArenaId | null>(null);
-  const difficulty: Difficulty = "normal";
+  const [difficulty, setDifficulty] = useState<Difficulty>("normal");
   const [sound, setSound] = useState(true);
 
   const navigate = (next: Screen, back = false) => {
@@ -74,8 +75,19 @@ function FightApp() {
   if (screen === "modes") {
     return (
       <GameModeSelection
-        onLocal={() => navigate("fighter")}
+        onLocal={() => navigate("difficulty")}
         onBack={() => navigate("menu", true)}
+      />
+    );
+  }
+
+  if (screen === "difficulty") {
+    return (
+      <DifficultySelection
+        selected={difficulty}
+        onSelect={setDifficulty}
+        onConfirm={() => navigate("fighter")}
+        onBack={() => navigate("modes", true)}
       />
     );
   }
@@ -112,13 +124,17 @@ function FightApp() {
       {screen === "fighter" && (
         <section className="ac-setup ac-fade-in">
           <StepTitle
-            step="01"
+            step="02"
             title="Escolha seu lutador"
             subtitle="Cada estilo exige uma estratégia"
           />
           <FighterRoster selected={fighter} onSelect={setFighter} />
           <div className="ac-actions">
-            <button className="ac-btn" data-variant="ghost" onClick={() => navigate("modes", true)}>
+            <button
+              className="ac-btn"
+              data-variant="ghost"
+              onClick={() => navigate("difficulty", true)}
+            >
               ‹ Voltar
             </button>
             <button className="ac-btn" data-variant="solid" onClick={() => navigate("opponent")}>
@@ -131,7 +147,7 @@ function FightApp() {
       {screen === "opponent" && (
         <section className="ac-setup ac-fade-in">
           <StepTitle
-            step="02"
+            step="03"
             title="Escolha seu adversário"
             subtitle="Selecione o lutador controlado pela IA"
           />
@@ -171,7 +187,7 @@ function FightApp() {
           <div className="ac-arena-shade" aria-hidden="true" />
           <div className="ac-arena-interface">
             <header className="ac-arena-title">
-              <span>03 // PRÓXIMO CONFRONTO</span>
+              <span>04 // PRÓXIMO CONFRONTO</span>
               <h1>Escolha sua arena</h1>
               <p>Defina o palco da batalha</p>
             </header>
