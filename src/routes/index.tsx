@@ -532,7 +532,7 @@ function TutorialScreen({
       if (activeStep === 1 && snap.p1.state === "jump") finishStep();
       if (activeStep === 2 && snap.p1.attackKind === "light") finishStep();
       if (activeStep === 3 && snap.p1.attackKind === "heavy") finishStep();
-      if (activeStep === 4 && snap.p1.blocking) finishStep();
+      if (activeStep === 4 && snap.p1SuccessfulBlocks > 0) finishStep();
       if (activeStep === 5 && snap.p1.attackKind === "special") finishStep();
     });
     let cancelled = false;
