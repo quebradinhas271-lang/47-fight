@@ -1,5 +1,11 @@
 export type GamepadContext = "capture" | "modal" | "tutorial-ui" | "tutorial" | "combat" | "menu";
-export function resolveGamepadContext(f: { capture: boolean; modal: boolean; tutorial: boolean; combat: boolean; tutorialUi?: boolean }): GamepadContext {
+export function resolveGamepadContext(f: {
+  capture: boolean;
+  modal: boolean;
+  tutorial: boolean;
+  combat: boolean;
+  tutorialUi?: boolean;
+}): GamepadContext {
   if (f.capture) return "capture";
   if (f.modal) return "modal";
   if (f.tutorial && f.tutorialUi) return "tutorial-ui";
