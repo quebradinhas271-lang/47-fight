@@ -45,7 +45,8 @@ export class GamepadController {
   }
 
   private onFrame = (event: Event) => {
-    const { pad, context } = (event as CustomEvent<{ pad: Gamepad; context: GamepadContext }>).detail;
+    const { pad, context } = (event as CustomEvent<{ pad: Gamepad; context: GamepadContext }>)
+      .detail;
     if (!gamepadCanControlArena(context, this.arena)) {
       this.releaseAll(); // Also clears pending gamepad actions in LocalInput.
       this.awaitingNeutral = true;
@@ -53,9 +54,9 @@ export class GamepadController {
     }
     // A held A/START from confirming a modal cannot become a strike/pause on resume.
     if (this.awaitingNeutral) {
-      const buttonsNeutral = !pad.buttons.some(button => button.pressed);
-      const stickNeutral = Math.abs(pad.axes[0] ?? 0) < DEADZONE &&
-        Math.abs(pad.axes[1] ?? 0) < DEADZONE;
+      const buttonsNeutral = !pad.buttons.some((button) => button.pressed);
+      const stickNeutral =
+        Math.abs(pad.axes[0] ?? 0) < DEADZONE && Math.abs(pad.axes[1] ?? 0) < DEADZONE;
       if (!buttonsNeutral || !stickNeutral) return;
       this.awaitingNeutral = false;
       return;
