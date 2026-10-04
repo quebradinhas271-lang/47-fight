@@ -24,7 +24,8 @@ function alphaBounds(buffer, frameWidth, frameCount) {
   assert.equal(width, frameWidth * frameCount);
 
   const idats = [];
-  for (let at = 8; at < buffer.length; ) {
+  let at = 8;
+  while (at < buffer.length) {
     const size = buffer.readUInt32BE(at);
     const kind = buffer.toString("ascii", at + 4, at + 8);
     if (kind === "IDAT") idats.push(buffer.subarray(at + 8, at + 8 + size));
@@ -92,9 +93,37 @@ test("El Dictador official light attack PNG matches the configured sprite frames
 });
 
 test("All six light punch frames exist, with measurable visual baseline", async () => {
-  const idleFrames = alphaBounds(await asset("el-dictador-idle-sheet.png"), idle.frameWidth, idle.frameCount);
+  const idleFrames = alphaBounds(
+    await asset("el-dictador-idle-sheet.png"),
+    idle.frameWidth,
+    idle.frameCount,
+  );
   const attackFrames = alphaBounds(png, light.frameWidth, light.frameCount);
   console.log("Official Dictador IDLE alpha bounds:", JSON.stringify(idleFrames));
   console.log("Official Dictador LIGHT alpha bounds:", JSON.stringify(attackFrames));
   assert.equal(attackFrames.length, 6);
+
+  const idleGuard = idleFrames[0];
+  const attackGuard = attackFrames[0];
+  assert.ok(
+    Math.abs(idleGuard.width * idle.scale - attackGuard.width * light.scaleX) < 6,
+    "first punch frame must match idle guard width",
+  );
+  const idleHeight = idleGuard.height * idle.scale;
+  const idleFeet = idle.offsetY - idleGuard.bottomMargin * idle.scale;
+  for (const frame of attackFrames) {
+    assert.ok(
+      Math.abs(idleHeight - frame.height * light.scaleY) < 7,
+      `punch frame ${frame.frame} must preserve idle body height`,
+    );
+    const attackFeet = light.offsetY - frame.bottomMargin * light.scaleY;
+    assert.ok(
+      Math.abs(idleFeet - attackFeet) < 3,
+      `punch frame ${frame.frame} must keep the boots on the same floor line`,
+    );
+  }
+  assert.ok(
+    attackFrames[3].width > attackGuard.width,
+    "extended punch must be wider than its initial guard pose",
+  );
 });

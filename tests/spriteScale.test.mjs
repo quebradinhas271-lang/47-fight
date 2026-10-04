@@ -16,7 +16,7 @@ test("El Dictador light attack preserves idle body proportions and foot position
   // Opaque bounds measured in the currently approved alpha masks. A new sheet
   // must be recalibrated if the visual asset is replaced.
   const idleBody = { width: 110, height: 241, bottomMargin: 6 };
-  const attackGuard = { width: 286, height: 488, bottomMargin: 115 };
+  const attackGuard = { width: 361, height: 577, bottomMargin: 96 };
   assert.equal(light.frameWidth, 480);
   assert.equal(light.frameHeight, 768);
   assert.equal(light.frameCount, 6);
