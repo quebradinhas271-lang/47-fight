@@ -8,6 +8,7 @@ const DEADZONE = 0.22;
 export class GamepadController {
   private pressed = new Set<ActionKey>();
   private startPressed = false;
+  private awaitingNeutral = false;
   private activeIndex: number | null = null;
 
   constructor(
@@ -47,6 +48,16 @@ export class GamepadController {
     const { pad, context } = (event as CustomEvent<{ pad: Gamepad; context: GamepadContext }>).detail;
     if (!gamepadCanControlArena(context, this.arena)) {
       this.releaseAll(); // Also clears pending gamepad actions in LocalInput.
+      this.awaitingNeutral = true;
+      return;
+    }
+    // A held A/START from confirming a modal cannot become a strike/pause on resume.
+    if (this.awaitingNeutral) {
+      const buttonsNeutral = !pad.buttons.some(button => button.pressed);
+      const stickNeutral = Math.abs(pad.axes[0] ?? 0) < DEADZONE &&
+        Math.abs(pad.axes[1] ?? 0) < DEADZONE;
+      if (!buttonsNeutral || !stickNeutral) return;
+      this.awaitingNeutral = false;
       return;
     }
     this.read(pad);
