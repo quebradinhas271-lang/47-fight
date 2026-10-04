@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Gamepad2,
   Info,
@@ -56,7 +56,7 @@ export function MainMenu({
   const [capturing, setCapturing] = useState<ActionKey | null>(null);
   const [gamepadBindings, setGamepadBindings] = useState(loadGamepadBindings);
   const [capturingGamepad, setCapturingGamepad] = useState<GamepadAction | null>(null);
-  const [gamepadCaptureArmed, setGamepadCaptureArmed] = useState(false);
+  const gamepadCaptureArmed = useRef(false);
   const [bindingError, setBindingError] = useState("");
   const [gamepadConnected, setGamepadConnected] = useState(false);
   const [inputMethod, setInputMethod] = useState("TECLADO / TOQUE");
@@ -96,13 +96,13 @@ export function MainMenu({
 
   useEffect(() => {
     if (!capturingGamepad) return;
-    setGamepadCaptureArmed(false);
+    gamepadCaptureArmed.current = false;
     const capture = (event: Event) => {
       const { pressed, previous, pad } = (
         event as CustomEvent<{ pressed: boolean[]; previous: boolean[]; pad: Gamepad }>
       ).detail;
-      if (!gamepadCaptureArmed) {
-        if (!pressed.some(Boolean)) setGamepadCaptureArmed(true);
+      if (!gamepadCaptureArmed.current) {
+        if (!pressed.some(Boolean)) gamepadCaptureArmed.current = true;
         return;
       }
       const index = pressed.findIndex((value, button) => value && !previous[button]);
@@ -129,7 +129,7 @@ export function MainMenu({
     };
     window.addEventListener(GAMEPAD_FRAME_EVENT, capture);
     return () => window.removeEventListener(GAMEPAD_FRAME_EVENT, capture);
-  }, [capturingGamepad, gamepadBindings, gamepadCaptureArmed]);
+  }, [capturingGamepad, gamepadBindings]);
 
   useEffect(() => {
     const updatePads = () => setGamepadConnected(Boolean(navigator.getGamepads?.().some(Boolean)));
