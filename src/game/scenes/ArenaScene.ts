@@ -664,7 +664,10 @@ export class ArenaScene extends Phaser.Scene {
           f.x + (animationDef.offsetX ?? 0) * f.facing,
           f.y + (animationDef.offsetY ?? 0),
         )
-        .setScale(animationDef.scale ?? config.displayScale)
+        .setScale(
+          animationDef.scaleX ?? animationDef.scale ?? config.displayScale,
+          animationDef.scaleY ?? animationDef.scale ?? config.displayScale,
+        )
         .setFlipX(f.facing === -1)
         .setAlpha(hurtFlash ? 0.55 : 1);
       return true;
