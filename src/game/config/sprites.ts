@@ -86,6 +86,16 @@ export const FIGHTER_SPRITES: Record<FighterId, FighterSpriteDef> = {
         offsetY: 4,
         scale: 1.22,
       },
+      light: {
+        asset: "/assets/fighters/el-dictador-light-attack.png",
+        frameWidth: 480,
+        frameHeight: 768,
+        frameCount: 6,
+        frameRate: 21,
+        repeat: 0,
+        offsetY: 4,
+        scale: 0.62,
+      },
     },
   },
   holofokiu: {
