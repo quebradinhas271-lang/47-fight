@@ -1,0 +1,43 @@
+name: Validate 47-FIGHT PR
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Tests, lint and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout PR version
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run automated tests
+        run: npm test
+
+      - name: Check lint
+        run: npm run lint
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Validate patch whitespace
+        run: git diff --check origin/main...HEAD

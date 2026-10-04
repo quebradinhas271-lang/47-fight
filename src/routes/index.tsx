@@ -18,6 +18,8 @@ import { GamepadController } from "../game/core/gamepad";
 import {
   CONTROLS_CHANGED_EVENT,
   formatKeyCode,
+  formatGamepadButton,
+  loadGamepadBindings,
   loadKeyboardBindings,
   loadVirtualControlsPreference,
 } from "../game/core/controlSettings";
@@ -451,16 +453,6 @@ const TUTORIAL_STEPS = [
   },
 ] as const;
 
-const GAMEPAD_LABELS: Record<ActionKey, string> = {
-  left: "ANALÓGICO / DIRECIONAL ←",
-  right: "ANALÓGICO / DIRECIONAL →",
-  up: "ANALÓGICO ↑ / DIRECIONAL ↑",
-  light: "BOTÃO A / ×",
-  heavy: "BOTÃO B / ○",
-  special: "BOTÃO Y / △",
-  block: "L1 / R1 / GATILHO",
-};
-
 const TOUCH_LABELS: Record<ActionKey, string> = {
   left: "JOYSTICK ←",
   right: "JOYSTICK →",
@@ -499,6 +491,7 @@ function TutorialScreen({
   );
   const [completed, setCompleted] = useState(false);
   const [bindings, setBindings] = useState(loadKeyboardBindings);
+  const [gamepadBindings, setGamepadBindings] = useState(loadGamepadBindings);
   const touchCapable =
     typeof navigator !== "undefined" &&
     (navigator.maxTouchPoints > 0 || window.matchMedia("(pointer: coarse)").matches);
@@ -566,7 +559,10 @@ function TutorialScreen({
     sceneRef.current?.setTutorialStep(step);
   }, [step]);
   useEffect(() => {
-    const changed = () => setBindings(loadKeyboardBindings());
+    const changed = () => {
+      setBindings(loadKeyboardBindings());
+      setGamepadBindings(loadGamepadBindings());
+    };
     window.addEventListener(CONTROLS_CHANGED_EVENT, changed);
     return () => window.removeEventListener(CONTROLS_CHANGED_EVENT, changed);
   }, []);
@@ -575,6 +571,7 @@ function TutorialScreen({
       inputRef.current,
       () => setMethod("gamepad"),
       () => undefined,
+      "tutorial",
     );
     const updateMethod = (event: Event) => {
       const next = (event as CustomEvent<string>).detail;
@@ -601,12 +598,16 @@ function TutorialScreen({
     method === "keyboard"
       ? formatKeyCode(bindings[action])
       : method === "gamepad"
-        ? GAMEPAD_LABELS[action]
+        ? formatGamepadButton(gamepadBindings[action])
         : TOUCH_LABELS[action];
 
   return (
     <main className="ac-fight-screen ac-tutorial-screen">
       <div className="ac-game" ref={host} aria-label="Arena de treinamento" />
+      <span className="sr-only">
+        No gamepad, use START ou OPTIONS para alternar entre praticar e navegar pelas ações do
+        tutorial.
+      </span>
       <section className="ac-tutorial-panel" aria-live="polite">
         <div className="ac-tutorial-progress" aria-label={`Etapa ${Math.min(step + 1, 7)} de 7`}>
           {Array.from({ length: 7 }, (_, index) => (
@@ -654,7 +655,7 @@ function TutorialScreen({
       )}
       <aside className="ac-tutorial-guide">
         <b>PERSONALIZE SEUS CONTROLES</b>
-        <span>Menu Principal › Configurações › Controles do teclado</span>
+        <span>Menu Principal › Configurações › Controles do teclado / Controles do gamepad</span>
         <p>
           Selecione o comando, pressione a nova tecla e confirme a alteração exibida. Use “Restaurar
           controles padrão” para voltar ao esquema original.
@@ -836,7 +837,7 @@ function FightScreen({
       )}
 
       {paused && !snapshot?.over && (
-        <div className="ac-overlay">
+        <div className="ac-overlay" role="dialog" aria-modal="true" aria-label="Jogo pausado">
           <div className="ac-modal ac-rise">
             <GameLogo variant="modal" />
             <span className="ac-kicker">COMBATE INTERROMPIDO</span>
@@ -852,7 +853,12 @@ function FightScreen({
         </div>
       )}
       {snapshot?.over && (
-        <div className="ac-overlay">
+        <div
+          className="ac-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Resultado da partida"
+        >
           <div className="ac-modal ac-rise">
             <GameLogo variant="modal" />
             <span className="ac-kicker">RESULTADO DA PARTIDA</span>

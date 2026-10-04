@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Gamepad2,
   Info,
@@ -13,15 +13,22 @@ import {
 import { GameLogo } from "./GameLogo";
 import { MenuActionButton } from "./MenuActionButton";
 import {
+  DEFAULT_GAMEPAD_BINDINGS,
   DEFAULT_KEYBOARD_BINDINGS,
+  formatGamepadButton,
   formatKeyCode,
   loadKeyboardBindings,
+  loadGamepadBindings,
   loadVirtualControlsPreference,
   saveKeyboardBindings,
+  saveGamepadBindings,
   saveVirtualControlsPreference,
   type KeyboardBindings,
+  type GamepadAction,
+  type GamepadBindings,
   type VirtualControlsPreference,
 } from "../game/core/controlSettings";
+import { GAMEPAD_FRAME_EVENT } from "./GlobalGameControls";
 import type { ActionKey } from "../game/core/input";
 
 type MainMenuProps = {
@@ -47,6 +54,9 @@ export function MainMenu({
   const [bindings, setBindings] = useState(loadKeyboardBindings);
   const [virtualControls, setVirtualControls] = useState(loadVirtualControlsPreference);
   const [capturing, setCapturing] = useState<ActionKey | null>(null);
+  const [gamepadBindings, setGamepadBindings] = useState(loadGamepadBindings);
+  const [capturingGamepad, setCapturingGamepad] = useState<GamepadAction | null>(null);
+  const gamepadCaptureArmed = useRef(false);
   const [bindingError, setBindingError] = useState("");
   const [gamepadConnected, setGamepadConnected] = useState(false);
   const [inputMethod, setInputMethod] = useState("TECLADO / TOQUE");
@@ -85,6 +95,43 @@ export function MainMenu({
   }, [bindings, capturing]);
 
   useEffect(() => {
+    if (!capturingGamepad) return;
+    gamepadCaptureArmed.current = false;
+    const capture = (event: Event) => {
+      const { pressed, previous, pad } = (
+        event as CustomEvent<{ pressed: boolean[]; previous: boolean[]; pad: Gamepad }>
+      ).detail;
+      if (!gamepadCaptureArmed.current) {
+        if (!pressed.some(Boolean)) gamepadCaptureArmed.current = true;
+        return;
+      }
+      const index = pressed.findIndex((value, button) => value && !previous[button]);
+      if (index < 0) return;
+      if (index === 1) {
+        setCapturingGamepad(null);
+        setBindingError("");
+        return;
+      }
+      if (pad.mapping !== "standard")
+        setBindingError("Layout não padronizado: confirme o rótulo físico do botão.");
+      if (
+        Object.entries(gamepadBindings).some(
+          ([action, button]) => action !== capturingGamepad && button === index,
+        )
+      ) {
+        setBindingError("Este botão já está atribuído a outro comando.");
+        return;
+      }
+      const next = { ...gamepadBindings, [capturingGamepad]: index } as GamepadBindings;
+      setGamepadBindings(next);
+      saveGamepadBindings(next);
+      setCapturingGamepad(null);
+    };
+    window.addEventListener(GAMEPAD_FRAME_EVENT, capture);
+    return () => window.removeEventListener(GAMEPAD_FRAME_EVENT, capture);
+  }, [capturingGamepad, gamepadBindings]);
+
+  useEffect(() => {
     const updatePads = () => setGamepadConnected(Boolean(navigator.getGamepads?.().some(Boolean)));
     const method = (event: Event) =>
       setInputMethod(String((event as CustomEvent).detail).toUpperCase());
@@ -108,6 +155,7 @@ export function MainMenu({
     ["heavy", "Ataque pesado (Chute)"],
     ["special", "Especial"],
   ];
+  const gamepadActions: [GamepadAction, string][] = [...actions, ["pause", "Pausar / retomar"]];
 
   return (
     <main className="ac-cinematic-screen ac-main-menu">
@@ -151,7 +199,10 @@ export function MainMenu({
             </button>
             <GameLogo variant="modal" />
             {panel === "settings" ? (
-              <div className="ac-settings-content">
+              <div
+                className="ac-settings-content"
+                data-gamepad-capturing={Boolean(capturingGamepad)}
+              >
                 <p className="ac-kicker">SISTEMA</p>
                 <h2 id="menu-panel-title">Configurações</h2>
                 <h3>Áudio</h3>
@@ -205,6 +256,44 @@ export function MainMenu({
                   }}
                 >
                   <RotateCcw aria-hidden="true" /> Restaurar controles padrão
+                </button>
+                <h3>
+                  <Gamepad2 aria-hidden="true" /> Controles do gamepad
+                </h3>
+                <div className="ac-key-bindings">
+                  {gamepadActions.map(([action, label]) => (
+                    <button
+                      key={action}
+                      onClick={() => {
+                        setBindingError("");
+                        setCapturingGamepad(action);
+                      }}
+                    >
+                      <span>{label}</span>
+                      <kbd>
+                        {capturingGamepad === action
+                          ? "PRESSIONE O NOVO BOTÃO DO CONTROLE"
+                          : formatGamepadButton(gamepadBindings[action])}
+                      </kbd>
+                    </button>
+                  ))}
+                </div>
+                {capturingGamepad && (
+                  <p className="ac-capture-help">
+                    Solte A / × e pressione o novo botão. B / ○ cancela.
+                  </p>
+                )}
+                <button
+                  className="ac-reset-controls"
+                  onClick={() => {
+                    const defaults = { ...DEFAULT_GAMEPAD_BINDINGS };
+                    setGamepadBindings(defaults);
+                    saveGamepadBindings(defaults);
+                    setCapturingGamepad(null);
+                    setBindingError("");
+                  }}
+                >
+                  <RotateCcw aria-hidden="true" /> Restaurar controles padrão do gamepad
                 </button>
                 <h3>Controles virtuais</h3>
                 <div
