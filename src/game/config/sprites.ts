@@ -88,8 +88,8 @@ export const FIGHTER_SPRITES: Record<FighterId, FighterSpriteDef> = {
       },
       light: {
         asset: "/assets/fighters/el-dictador-light-attack.png",
-        frameWidth: 256,
-        frameHeight: 512,
+        frameWidth: 480,
+        frameHeight: 768,
         frameCount: 6,
         frameRate: 21,
         repeat: 0,
