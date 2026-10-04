@@ -68,6 +68,8 @@ export class ArenaScene extends Phaser.Scene {
   private gfx!: Phaser.GameObjects.Graphics;
   private fx!: Phaser.GameObjects.Graphics;
   private fighterSprites = new Map<Fighter, Phaser.GameObjects.Image | Phaser.GameObjects.Sprite>();
+  /** Identifica reinícios do mesmo golpe leve durante combos sem tocar na simulação. */
+  private previousVisualAttackTime = new Map<Fighter, number>();
   private announce!: Phaser.GameObjects.Text;
   private sparks: Spark[] = [];
   private floats: FloatText[] = [];
@@ -203,6 +205,7 @@ export class ArenaScene extends Phaser.Scene {
     this.floatObjects.forEach((item) => item.setVisible(false));
     this.announce.setText("PREPARAR").setAlpha(1);
     this.sceneData.input.resetAll();
+    this.previousVisualAttackTime.clear();
     this.emitSnapshot();
   }
 
@@ -629,6 +632,10 @@ export class ArenaScene extends Phaser.Scene {
     if (!sprite) return false;
     const config = FIGHTER_SPRITES[f.stats.id];
     const requested: FighterAnimation = f.state === "attack" ? (f.attackKind ?? "idle") : f.state;
+    const previousAttackTime = this.previousVisualAttackTime.get(f) ?? -1;
+    const restartedAttack =
+      f.state === "attack" && previousAttackTime >= 0 && f.attackTime < previousAttackTime;
+    this.previousVisualAttackTime.set(f, f.state === "attack" ? f.attackTime : -1);
     const visualAnimation = [requested, "idle" as const].find(
       (candidate, index, candidates) =>
         candidates.indexOf(candidate) === index &&
@@ -642,7 +649,15 @@ export class ArenaScene extends Phaser.Scene {
       const key = spriteAnimationKey(f.stats.id, visualAnimation);
       const texture = spriteTextureKey(animationDef.asset);
       if (sprite.texture.key !== texture) sprite.setTexture(texture);
-      if (sprite.anims.currentAnim?.key !== key || !sprite.anims.isPlaying) sprite.play(key, true);
+      if (
+        sprite.anims.currentAnim?.key !== key ||
+        restartedAttack ||
+        (!sprite.anims.isPlaying && animationDef.repeat === -1)
+      ) {
+        // Ataques de execução única mantêm o último quadro até a máquina de
+        // estados solicitar idle; novo combo reinicia com attackTime zerado.
+        sprite.play(key, true);
+      }
       sprite
         .setVisible(true)
         .setPosition(
