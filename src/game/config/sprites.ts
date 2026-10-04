@@ -101,7 +101,7 @@ export const FIGHTER_SPRITES: Record<FighterId, FighterSpriteDef> = {
         // altura aparente ~293px, largura de guarda ~132px e botas na mesma linha.
         offsetY: 66,
         scaleX: 0.46,
-        scaleY: 0.60,
+        scaleY: 0.6,
       },
     },
   },
