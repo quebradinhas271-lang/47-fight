@@ -34,7 +34,10 @@ test("El Dictador light attack preserves idle body proportions and foot position
 });
 
 test("Phaser uses separate visual axis scales when supplied", async () => {
-  const scene = await readFile(new URL("../src/game/scenes/ArenaScene.ts", import.meta.url), "utf8");
-  assert.match(scene, /animationDef\\.scaleX \\?\\? animationDef\\.scale/);
-  assert.match(scene, /animationDef\\.scaleY \\?\\? animationDef\\.scale/);
+  const scene = await readFile(
+    new URL("../src/game/scenes/ArenaScene.ts", import.meta.url),
+    "utf8",
+  );
+  assert.ok(scene.includes("animationDef.scaleX ?? animationDef.scale"));
+  assert.ok(scene.includes("animationDef.scaleY ?? animationDef.scale"));
 });
