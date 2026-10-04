@@ -30,15 +30,6 @@ jobs:
       - name: Install locked dependencies
         run: bun install --frozen-lockfile
 
-      # Temporary diagnostic: obtain exact Prettier output for the PR files without
-      # touching the published branch or pretending that formatting is already committed.
-      - name: Produce formatted versions of patched files
-        run: |
-          bunx prettier --write src/components/GlobalGameControls.tsx src/game/core/gamepad.ts src/game/core/gamepadContext.ts src/routes/index.tsx tests/gamepadContext.test.mjs
-          for file in src/components/GlobalGameControls.tsx src/game/core/gamepad.ts src/game/core/gamepadContext.ts src/routes/index.tsx tests/gamepadContext.test.mjs; do
-            echo "FORMATTED_FILE:$file:$(base64 -w0 "$file")"
-          done
-
       - name: Run automated tests
         run: npm test
 
