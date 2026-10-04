@@ -571,6 +571,7 @@ function TutorialScreen({
       inputRef.current,
       () => setMethod("gamepad"),
       () => undefined,
+      "tutorial",
     );
     const updateMethod = (event: Event) => {
       const next = (event as CustomEvent<string>).detail;
@@ -603,6 +604,7 @@ function TutorialScreen({
   return (
     <main className="ac-fight-screen ac-tutorial-screen">
       <div className="ac-game" ref={host} aria-label="Arena de treinamento" />
+      <span className="sr-only">No gamepad, use START ou OPTIONS para alternar entre praticar e navegar pelas ações do tutorial.</span>
       <section className="ac-tutorial-panel" aria-live="polite">
         <div className="ac-tutorial-progress" aria-label={`Etapa ${Math.min(step + 1, 7)} de 7`}>
           {Array.from({ length: 7 }, (_, index) => (
