@@ -1,6 +1,7 @@
 import type { ActionKey, LocalInput } from "./input";
 import { DEFAULT_GAMEPAD_BINDINGS, loadGamepadBindings } from "./controlSettings";
 import { GAMEPAD_FRAME_EVENT } from "../../components/GlobalGameControls";
+import { gamepadCanControlArena, type GamepadContext } from "./gamepadContext";
 
 const DEADZONE = 0.22;
 
@@ -13,6 +14,7 @@ export class GamepadController {
     private input: LocalInput,
     private onActivity: () => void,
     private onPause: () => void,
+    private arena: "combat" | "tutorial" = "combat",
   ) {}
 
   start() {
@@ -41,8 +43,14 @@ export class GamepadController {
     this.startPressed = false;
   }
 
-  private onFrame = (event: Event) =>
-    this.read((event as CustomEvent<{ pad: Gamepad }>).detail.pad);
+  private onFrame = (event: Event) => {
+    const { pad, context } = (event as CustomEvent<{ pad: Gamepad; context: GamepadContext }>).detail;
+    if (!gamepadCanControlArena(context, this.arena)) {
+      this.releaseAll(); // Also clears pending gamepad actions in LocalInput.
+      return;
+    }
+    this.read(pad);
+  };
 
   private read(pad: Gamepad) {
     const axisX = pad.axes[0] ?? 0;
