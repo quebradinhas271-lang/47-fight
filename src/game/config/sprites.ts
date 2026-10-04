@@ -26,6 +26,9 @@ interface SpriteAnimationBase {
   offsetY?: number;
   /** Override opcional da escala visual do lutador. */
   scale?: number;
+  /** Permite ajustar proporção visual sem modificar o corpo/hitbox do jogo. */
+  scaleX?: number;
+  scaleY?: number;
 }
 
 /** Uma animação pode declarar a quantidade de frames ou um intervalo inclusivo. */
@@ -93,8 +96,12 @@ export const FIGHTER_SPRITES: Record<FighterId, FighterSpriteDef> = {
         frameCount: 6,
         frameRate: 21,
         repeat: 0,
-        offsetY: 4,
-        scale: 0.62,
+        // Atlas 480×768: a arte é mais larga e tem 115px transparentes sob as botas.
+        // Ajuste visual de referência em comparação com idle (256×256 a 1.22):
+        // altura aparente ~293px, largura de guarda ~132px e botas na mesma linha.
+        offsetY: 66,
+        scaleX: 0.46,
+        scaleY: 0.6,
       },
     },
   },
