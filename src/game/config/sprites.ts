@@ -99,7 +99,7 @@ export const FIGHTER_SPRITES: Record<FighterId, FighterSpriteDef> = {
         // PNG oficial: guarda com alpha 361×577 e margem de 96px sob as botas.
         // Ajuste visual final: amplia o golpe proporcionalmente para aproximar
         // sua altura aparente do idle, preservando a linha dos pés no chão.
-        offsetY: 37,
+        offsetY: 41,
         scaleX: 0.455,
         scaleY: 0.466,
       },
