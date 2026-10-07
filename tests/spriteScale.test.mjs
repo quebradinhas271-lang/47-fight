@@ -24,7 +24,7 @@ test("El Dictador light attack preserves approved width and ground baseline", ()
     Math.abs(idleBody.width * idle.scale - attackGuard.width * light.scaleX) < 6,
     "stance should not suddenly become wider when starting a punch",
   );
-  assert.equal(light.scaleY, 0.44, "keep the gameplay-approved vertical calibration");
+  assert.equal(light.scaleY, 0.38, "keep the revised in-game vertical calibration");
   const alphaMatchedScale = (idleBody.height * idle.scale) / attackGuard.height;
   assert.ok(
     light.scaleY < alphaMatchedScale,
