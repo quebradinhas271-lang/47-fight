@@ -96,12 +96,12 @@ export const FIGHTER_SPRITES: Record<FighterId, FighterSpriteDef> = {
         frameCount: 6,
         frameRate: 21,
         repeat: 0,
-        // Atlas 480×768: a arte é mais larga e tem 115px transparentes sob as botas.
-        // Ajuste visual de referência em comparação com idle (256×256 a 1.22):
-        // altura aparente ~293px, largura de guarda ~132px e botas na mesma linha.
-        offsetY: 66,
-        scaleX: 0.46,
-        scaleY: 0.6,
+        // PNG oficial: guarda com alpha 361×577 e margem de 96px sob as botas.
+        // Calibração vertical corrigida a partir da comparação visual na arena:
+        // reduz altura do soco mantendo o posicionamento dos pés no chão.
+        offsetY: 33,
+        scaleX: 0.37,
+        scaleY: 0.38,
       },
     },
   },
