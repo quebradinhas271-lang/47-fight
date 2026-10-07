@@ -105,9 +105,11 @@ test("All six light punch frames exist, with measurable visual baseline", async 
 
   const idleGuard = idleFrames[0];
   const attackGuard = attackFrames[0];
+  const horizontalGrowth = light.scaleX / 0.37;
+  const verticalGrowth = light.scaleY / 0.38;
   assert.ok(
-    Math.abs(idleGuard.width * idle.scale - attackGuard.width * light.scaleX) < 6,
-    "first punch frame must match idle guard width",
+    Math.abs(horizontalGrowth - verticalGrowth) < 0.03,
+    "official punch must preserve the approved body proportions when uniformly enlarged",
   );
   assert.equal(light.scaleY, 0.42, "official punch keeps the revised in-game height");
   const idleFeet = idle.offsetY - idleGuard.bottomMargin * idle.scale;
