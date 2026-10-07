@@ -99,9 +99,9 @@ export const FIGHTER_SPRITES: Record<FighterId, FighterSpriteDef> = {
         // PNG oficial: guarda com alpha 361×577 e margem de 96px sob as botas.
         // Calibração vertical corrigida a partir da comparação visual na arena:
         // reduz altura do soco mantendo o posicionamento dos pés no chão.
-        offsetY: 33,
-        scaleX: 0.37,
-        scaleY: 0.38,
+        offsetY: 37,
+        scaleX: 0.41,
+        scaleY: 0.42,
       },
     },
   },
