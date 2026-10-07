@@ -111,7 +111,7 @@ test("All six light punch frames exist, with measurable visual baseline", async 
     Math.abs(horizontalGrowth - verticalGrowth) < 0.03,
     "official punch must preserve the approved body proportions when uniformly enlarged",
   );
-  assert.equal(light.scaleY, 0.42, "official punch keeps the revised in-game height");
+  assert.equal(light.scaleY, 0.466, "official punch keeps the final in-game height");
   const idleFeet = idle.offsetY - idleGuard.bottomMargin * idle.scale;
   for (const frame of attackFrames) {
     const attackFeet = light.offsetY - frame.bottomMargin * light.scaleY;
