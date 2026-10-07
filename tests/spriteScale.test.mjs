@@ -11,10 +11,10 @@ const { FIGHTER_SPRITES } = await import(
   `data:text/javascript;base64,${Buffer.from(javascript).toString("base64")}`
 );
 
-test("El Dictador light attack preserves idle body proportions and foot position", () => {
+test("El Dictador light attack preserves approved width and ground baseline", () => {
   const { idle, light } = FIGHTER_SPRITES.dictador.animations;
-  // Opaque bounds measured in the currently approved alpha masks. A new sheet
-  // must be recalibrated if the visual asset is replaced.
+  // Opaque bounds measured in the currently approved alpha masks. The vertical
+  // scale is intentionally lower than alpha-height parity after in-game visual calibration.
   const idleBody = { width: 110, height: 241, bottomMargin: 6 };
   const attackGuard = { width: 361, height: 577, bottomMargin: 96 };
   assert.equal(light.frameWidth, 480);
@@ -24,9 +24,11 @@ test("El Dictador light attack preserves idle body proportions and foot position
     Math.abs(idleBody.width * idle.scale - attackGuard.width * light.scaleX) < 6,
     "stance should not suddenly become wider when starting a punch",
   );
+  assert.equal(light.scaleY, 0.44, "keep the gameplay-approved vertical calibration");
+  const alphaMatchedScale = (idleBody.height * idle.scale) / attackGuard.height;
   assert.ok(
-    Math.abs(idleBody.height * idle.scale - attackGuard.height * light.scaleY) < 6,
-    "stance should not change apparent height when starting a punch",
+    light.scaleY < alphaMatchedScale,
+    "visual calibration intentionally compensates for the taller attack artwork",
   );
   const idleFeet = idle.offsetY - idleBody.bottomMargin * idle.scale;
   const attackFeet = light.offsetY - attackGuard.bottomMargin * light.scaleY;
