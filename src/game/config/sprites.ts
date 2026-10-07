@@ -97,11 +97,11 @@ export const FIGHTER_SPRITES: Record<FighterId, FighterSpriteDef> = {
         frameRate: 21,
         repeat: 0,
         // PNG oficial: guarda com alpha 361×577 e margem de 96px sob as botas.
-        // Equaliza a silhueta com o idle (110×241 a 1.22) e a linha dos pés
-        // em todos os seis quadros, sem mudar corpo, física ou hitboxes.
-        offsetY: 45,
+        // A escala vertical foi calibrada visualmente em partida contra o idle/walk;
+        // offsetY preserva a linha dos pés sem alterar corpo, física ou hitboxes.
+        offsetY: 39,
         scaleX: 0.37,
-        scaleY: 0.51,
+        scaleY: 0.44,
       },
     },
   },
