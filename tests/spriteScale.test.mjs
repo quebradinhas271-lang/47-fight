@@ -26,7 +26,7 @@ test("El Dictador light attack preserves approved width and ground baseline", ()
     Math.abs(horizontalGrowth - verticalGrowth) < 0.03,
     "light attack must grow uniformly without distorting the approved body proportions",
   );
-  assert.equal(light.scaleY, 0.42, "keep the revised in-game vertical calibration");
+  assert.equal(light.scaleY, 0.466, "keep the final in-game vertical calibration");
   const alphaMatchedScale = (idleBody.height * idle.scale) / attackGuard.height;
   assert.ok(
     light.scaleY < alphaMatchedScale,
